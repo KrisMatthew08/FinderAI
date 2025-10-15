@@ -26,6 +26,9 @@ conn.once('open', () => {
   gfs.collection('uploads');
   console.log('MongoDB connected and GridFS initialized');
 });
+conn.on('error', (err) => {
+  console.error('MongoDB connection error:', err.message);
+});
 
 // Mongoose schema for items
 const itemSchema = new mongoose.Schema({
@@ -72,7 +75,7 @@ app.post('/api/items', upload.single('image'), async (req, res) => {
     // store file in GridFS
     const writeStream = gfs.createWriteStream({
       filename: req.file.originalname,
-      content_type: req.file.mimetype
+      contentType: req.file.mimetype
     });
     fs.createReadStream(processedPath).pipe(writeStream);
     writeStream.on('close', async (file) => {
@@ -166,12 +169,18 @@ app.get('/api/image/:fileId', (req, res) => {
     gfs.files.findOne({ _id }, (err, file) => {
       if (!file || file.length === 0) return res.status(404).json({ error: 'No file found' });
       const readstream = gfs.createReadStream({ _id: file._id });
-      res.set('Content-Type', file.contentType);
+      res.set('Content-Type', file.contentType || file.content_type || 'application/octet-stream');
       readstream.pipe(res);
     });
   } catch (err) {
     return res.status(400).json({ error: 'Invalid file id' });
   }
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+  const mongoState = mongoose.connection.readyState; // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+  res.json({ status: 'ok', db: mongoState });
 });
 
 // Feedback endpoint (confirm match or reject)
@@ -201,6 +210,16 @@ app.post('/api/feedback', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`FinderAI backend running on port ${port}`);
+const host = process.env.HOST || '0.0.0.0';
+const server = app.listen(port, host, () => {
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? addr : `${addr.address}:${addr.port}`;
+  console.log(`FinderAI backend running on http://${bind}`);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
 });
