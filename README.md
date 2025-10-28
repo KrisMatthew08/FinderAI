@@ -49,12 +49,36 @@ Open http://127.0.0.1:8000/docs to explore the interactive API.
 - GET /healthz — simple health probe: {"status":"ok"}
 - POST /ai/search — placeholder AI search with body: {"query": "..."}
 
+### Image storage with MongoDB (GridFS)
+
+Environment variables:
+
+- MONGODB_URI (default: mongodb://localhost:27017)
+- MONGODB_DB (default: finderai)
+- GRIDFS_BUCKET (default: images)
+
+Endpoints:
+
+- POST /images — multipart/form-data with field "file"; stores into GridFS, returns { id, filename, contentType, length }
+- GET /images/{id} — streams the binary content with the original Content-Type
+- DELETE /images/{id} — deletes the stored file
+
+Example (PowerShell, optional):
+
+```
+$Env:MONGODB_URI = "mongodb://localhost:27017"
+$Env:MONGODB_DB = "finderai"
+```
+
 ## Tests
 
 ```
 cd backend
 pytest -q
 ```
+
+Notes:
+- Image endpoint tests are skipped unless `MONGODB_URI` is set and reachable.
 
 ## Next steps
 
