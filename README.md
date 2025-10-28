@@ -17,11 +17,21 @@ An initial scaffold for the FinderAI project, prepared from the attached project
 backend/
   app/
     __init__.py
-    main.py          # FastAPI app: /healthz and /ai/search (placeholder)
+    main.py          # FastAPI app: /healthz, /ai/search, /images (GridFS)
   requirements.txt   # runtime deps
   dev-requirements.txt
   tests/
     test_api.py      # minimal tests
+    test_images.py   # image endpoint tests
+node-server/         # Node.js image service (alternative)
+  index.js           # Express + GridFS
+  db.js
+  middleware/
+    upload.js        # Multer GridFS storage
+  routes/
+    upload.js
+  package.json
+  README.md
 .github/
   workflows/
     ci.yml           # CI: lint/tests (pytest)
@@ -85,6 +95,11 @@ Notes:
 - Replace the placeholder search logic in `app/main.py` with the approach specified in the project proposal (embedding model, retrieval, ranking, etc.).
 - Add configuration (API keys, model choices) via environment variables.
 - If needed, add a frontend and wire it to these endpoints.
+- Choose between the Python FastAPI image endpoints or the Node.js service (or run both on different ports).
+
+## Node.js Image Service (alternative)
+
+If you prefer the Node/Express implementation from [sk-Jahangeer/media-upload-node-mongo](https://github.com/sk-Jahangeer/media-upload-node-mongo), see `node-server/README.md` for setup and usage. It offers the same GridFS-based upload/retrieve/delete but in a separate Node process.
 
 ## License
 
