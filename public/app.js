@@ -132,13 +132,13 @@ async function search() {
             <h5>Lost: ${match.lost.category}</h5>
             <p>${match.lost.description || 'No description'}</p>
             <p><strong>Location:</strong> ${match.lost.location}</p>
-            ${match.lost.imagePath ? `<img src="/${match.lost.imagePath}" alt="Lost item" style="max-width: 200px;">` : ''}
+            <img src="/api/items/image/${match.lost.id}" alt="Lost item" style="max-width: 200px;" onerror="this.style.display='none'">
           </div>
           <div>
             <h5>Found: ${match.found.category}</h5>
             <p>${match.found.description || 'No description'}</p>
             <p><strong>Location:</strong> ${match.found.location}</p>
-            ${match.found.imagePath ? `<img src="/${match.found.imagePath}" alt="Found item" style="max-width: 200px;">` : ''}
+            <img src="/api/items/image/${match.found.id}" alt="Found item" style="max-width: 200px;" onerror="this.style.display='none'">
           </div>
         </div>
       </div>

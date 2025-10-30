@@ -5,9 +5,13 @@ const auth = require('../middleware/auth');
 const axios = require('axios');
 const sharp = require('sharp');
 const fs = require('fs').promises;
+const fsSync = require('fs'); // For synchronous file operations
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' }); // Store images in 'uploads' folder
+const upload = multer({ 
+  dest: 'uploads/',
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // Cosine similarity function for vector comparison
 function cosineSimilarity(vecA, vecB) {
@@ -26,8 +30,11 @@ router.post('/upload', upload.single('image'), async (req, res) => {
   }
 
   try {
-    // Process image with sharp - resize to ViT input size
-    const imageBuffer = await sharp(req.file.path)
+    // Read the original image file as buffer
+    const originalImageBuffer = await fs.readFile(req.file.path);
+    
+    // Process image with sharp for AI - resize to 224x224
+    const processedImageBuffer = await sharp(req.file.path)
       .resize(224, 224)
       .jpeg({ quality: 80 })
       .toBuffer();
@@ -38,7 +45,7 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     // Note: sentence-transformers/clip-ViT-B-32 is specifically designed for image embeddings
     const response = await axios.post(
       'https://api-inference.huggingface.co/models/sentence-transformers/clip-ViT-B-32',
-      imageBuffer,
+      processedImageBuffer,
       {
         headers: {
           Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
@@ -78,18 +85,29 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     console.log('✅ Embeddings received:', embeddings.length, 'dimensions');
     console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
 
+    // Store item in MongoDB with binary image data
     const item = new Item({
       type,
       category,
       description,
       location,
-      imagePath: req.file.path,
+      image: originalImageBuffer, // Store original image as binary
+      imageType: req.file.mimetype, // Store MIME type (e.g., 'image/jpeg')
       userId: null, // Temporarily null for testing
       embeddings
     });
     
     await item.save();
     console.log('✅ Item saved to database:', item._id);
+    
+    // Clean up temporary file
+    try {
+      await fs.unlink(req.file.path);
+      console.log('✅ Temporary file cleaned up');
+    } catch (cleanupErr) {
+      console.warn('⚠️ Could not delete temp file:', cleanupErr.message);
+    }
+    
     res.status(201).json({ message: 'Item uploaded successfully', itemId: item._id });
   } catch (err) {
     console.error('❌ Upload error:', err.message);
@@ -143,15 +161,13 @@ router.get('/search', async (req, res) => {
               id: lostItem._id,
               category: lostItem.category,
               description: lostItem.description,
-              location: lostItem.location,
-              imagePath: lostItem.imagePath
+              location: lostItem.location
             },
             found: {
               id: foundItem._id,
               category: foundItem.category,
               description: foundItem.description,
-              location: foundItem.location,
-              imagePath: foundItem.imagePath
+              location: foundItem.location
             },
             score: parseFloat(similarity.toFixed(3))
           });
@@ -167,6 +183,23 @@ router.get('/search', async (req, res) => {
   } catch (err) {
     console.error('Search error:', err);
     res.status(500).json({ message: 'Error searching items: ' + err.message });
+  }
+});
+
+// Get image by ID - serves image from MongoDB
+router.get('/image/:id', async (req, res) => {
+  try {
+    const item = await Item.findById(req.params.id);
+    
+    if (!item || !item.image) {
+      return res.status(404).send('Image not found');
+    }
+    
+    res.set('Content-Type', item.imageType);
+    res.send(item.image);
+  } catch (err) {
+    console.error('Error retrieving image:', err);
+    res.status(500).send('Error retrieving image');
   }
 });
 

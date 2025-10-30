@@ -6,7 +6,8 @@ const itemSchema = new mongoose.Schema({
   description: String,
   location: String,
   date: { type: Date, default: Date.now },
-  imagePath: String, // Path to uploaded image
+  image: { type: Buffer, required: true }, // Store image as binary data
+  imageType: { type: String, required: true }, // MIME type (e.g., 'image/jpeg')
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   embeddings: {
     type: [Number],
