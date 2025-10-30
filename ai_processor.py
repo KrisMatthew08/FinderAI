@@ -73,7 +73,10 @@ def get_embeddings(image_path):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         result = {"error": "Usage: python ai_processor.py <image_path>", "success": False}
-        print(json.dumps(result))
+        try:
+            print(json.dumps(result))
+        except Exception as e:
+            print(json.dumps({"error": "JSON dump failed: " + str(e), "success": False}))
         sys.exit(1)
     
     image_path = sys.argv[1]
@@ -82,4 +85,14 @@ if __name__ == "__main__":
     result = get_embeddings(image_path)
     
     # Output JSON to stdout (Node.js will read this)
-    print(json.dumps(result))
+    try:
+        print(json.dumps(result))
+        sys.stdout.flush()  # Ensure output is sent immediately
+    except Exception as e:
+        try:
+            print(json.dumps({"error": "JSON dump failed: " + str(e), "success": False}))
+            sys.stdout.flush()
+        except:
+            # Last resort - print simple error
+            print('{"error": "Critical JSON error", "success": false}')
+            sys.stdout.flush()

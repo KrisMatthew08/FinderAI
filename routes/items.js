@@ -44,8 +44,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     console.log('Image processed, generating embeddings locally...');
     
     // AI: Generate embeddings using local Python script
+    // Try simple processor first (more stable), fallback to ViT if needed
     const embeddings = await new Promise((resolve, reject) => {
-      const pythonScriptPath = path.join(__dirname, '..', 'ai_processor.py');
+      const pythonScriptPath = path.join(__dirname, '..', 'ai_processor_simple.py');
+      console.log('Using simple feature extractor:', pythonScriptPath);
       const pythonProcess = spawn('python', [pythonScriptPath, req.file.path]);
       
       let stdoutData = '';
@@ -62,10 +64,22 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       
       pythonProcess.on('close', (code) => {
         console.log(`Python process exited with code ${code}`);
+        console.log('Python stdout length:', stdoutData.length, 'bytes');
         
-        // Try to parse the result even if exit code is non-zero
+        // Check if we got any output
+        if (!stdoutData || stdoutData.trim().length === 0) {
+          console.error('❌ No output from Python script');
+          console.error('Python stderr:', stderrData);
+          reject(new Error(`Python script produced no output. Exit code: ${code}`));
+          return;
+        }
+        
+        // Try to parse the result
         try {
-          const result = JSON.parse(stdoutData.trim());
+          const trimmedOutput = stdoutData.trim();
+          console.log('Parsing JSON output (first 100 chars):', trimmedOutput.substring(0, 100));
+          
+          const result = JSON.parse(trimmedOutput);
           
           // Check if result contains an error
           if (result.error || !result.success) {
@@ -92,7 +106,7 @@ router.post('/upload', upload.single('image'), async (req, res) => {
           resolve(embeddings);
         } catch (parseErr) {
           console.error('❌ Failed to parse Python output:', parseErr.message);
-          console.error('Python stdout:', stdoutData);
+          console.error('Raw stdout:', stdoutData);
           console.error('Python stderr:', stderrData);
           reject(new Error(`Failed to parse embeddings: ${parseErr.message}`));
         }
