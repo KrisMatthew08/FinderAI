@@ -17,22 +17,22 @@ function cosineSimilarity(vecA, vecB) {
   return dot / (magA * magB);
 }
 
-// Upload item
-router.post('/upload', auth, upload.single('image'), async (req, res) => {
+// Upload item (auth temporarily removed for testing)
+router.post('/upload', upload.single('image'), async (req, res) => {
   const { type, category, description, location } = req.body;
-  const imagePath = req.file.path;
+  
+  if (!req.file) {
+    return res.status(400).json({ message: 'No image uploaded' });
+  }
 
   try {
-    // Process image with sharp
-    const processedImagePath = `${imagePath}_processed.jpg`;
-    await sharp(imagePath)
-      .resize(224, 224) // Resize to ViT input size
+    // Process image with sharp - resize to ViT input size
+    const imageBuffer = await sharp(req.file.path)
+      .resize(224, 224)
       .jpeg({ quality: 80 })
-      .toFile(processedImagePath);
+      .toBuffer();
     
-    // Read image as base64 for Hugging Face API
-    const imageBuffer = await fs.readFile(processedImagePath);
-    const imageBase64 = imageBuffer.toString('base64');
+    console.log('Image processed, sending to Hugging Face API...');
     
     // AI: Extract features using Hugging Face
     const response = await axios.post(
@@ -46,63 +46,97 @@ router.post('/upload', auth, upload.single('image'), async (req, res) => {
       }
     );
     
-    const embeddings = Array.isArray(response.data) ? response.data : [];
+    // Extract embeddings from response
+    let embeddings = [];
+    if (Array.isArray(response.data)) {
+      embeddings = response.data.flat(); // Flatten if nested
+    } else if (response.data[0]?.hidden_states) {
+      embeddings = response.data[0].hidden_states[0]; // ViT format
+    } else {
+      embeddings = Object.values(response.data).flat(); // Alternative format
+    }
+    
+    console.log('Embeddings received:', embeddings.length, 'dimensions');
 
     const item = new Item({
       type,
       category,
       description,
       location,
-      imagePath: processedImagePath,
-      userId: req.user.id,
+      imagePath: req.file.path,
+      userId: null, // Temporarily null for testing
       embeddings
     });
     
     await item.save();
-    res.status(201).send('Item uploaded successfully');
+    console.log('Item saved to database:', item._id);
+    res.status(201).json({ message: 'Item uploaded successfully', itemId: item._id });
   } catch (err) {
-    console.error('Upload error:', err);
-    res.status(500).send('Error uploading item: ' + err.message);
+    console.error('Upload error:', err.message);
+    console.error('Full error:', err);
+    res.status(500).json({ message: 'Error uploading item: ' + err.message });
   }
 });
 
-// Search/Match items with similarity scoring
-router.get('/search', auth, async (req, res) => {
+// Search/Match items with similarity scoring (auth temporarily removed for testing)
+router.get('/search', async (req, res) => {
   try {
-    const userItems = await Item.find({ userId: req.user.id, type: 'lost' });
-    const allFoundItems = await Item.find({ type: 'found' });
+    const lostItems = await Item.find({ type: 'lost' });
+    const foundItems = await Item.find({ type: 'found' });
     
-    if (userItems.length === 0) {
+    console.log(`Found ${lostItems.length} lost items and ${foundItems.length} found items`);
+    
+    if (lostItems.length === 0 || foundItems.length === 0) {
       return res.json([]);
     }
     
     const matches = [];
     
-    for (const lostItem of userItems) {
-      if (!lostItem.embeddings || lostItem.embeddings.length === 0) continue;
+    for (const lostItem of lostItems) {
+      if (!lostItem.embeddings || lostItem.embeddings.length === 0) {
+        console.log('Lost item missing embeddings:', lostItem._id);
+        continue;
+      }
       
-      for (const foundItem of allFoundItems) {
-        if (!foundItem.embeddings || foundItem.embeddings.length === 0) continue;
+      for (const foundItem of foundItems) {
+        if (!foundItem.embeddings || foundItem.embeddings.length === 0) {
+          console.log('Found item missing embeddings:', foundItem._id);
+          continue;
+        }
         
         const similarity = cosineSimilarity(lostItem.embeddings, foundItem.embeddings);
+        console.log(`Similarity between ${lostItem.category} and ${foundItem.category}: ${similarity.toFixed(3)}`);
         
-        if (similarity > 0.7) { // Threshold for matches
+        if (similarity > 0.5) { // Lowered threshold for testing
           matches.push({
-            ...foundItem.toObject(),
-            similarity: similarity.toFixed(3),
-            matchedWith: lostItem.category
+            lost: {
+              id: lostItem._id,
+              category: lostItem.category,
+              description: lostItem.description,
+              location: lostItem.location,
+              imagePath: lostItem.imagePath
+            },
+            found: {
+              id: foundItem._id,
+              category: foundItem.category,
+              description: foundItem.description,
+              location: foundItem.location,
+              imagePath: foundItem.imagePath
+            },
+            score: parseFloat(similarity.toFixed(3))
           });
         }
       }
     }
     
     // Sort by similarity score
-    matches.sort((a, b) => b.similarity - a.similarity);
+    matches.sort((a, b) => b.score - a.score);
     
+    console.log(`Returning ${matches.length} matches`);
     res.json(matches);
   } catch (err) {
     console.error('Search error:', err);
-    res.status(500).send('Error searching items: ' + err.message);
+    res.status(500).json({ message: 'Error searching items: ' + err.message });
   }
 });
 

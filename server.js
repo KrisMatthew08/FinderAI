@@ -19,6 +19,8 @@ app.use('/api/items', require('./routes/items'));
 
 // Serve static files from the public directory
 app.use(express.static('public'));
+// Serve uploaded images
+app.use('/uploads', express.static('uploads'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

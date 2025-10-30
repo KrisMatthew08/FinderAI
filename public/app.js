@@ -1,10 +1,8 @@
 let token = localStorage.getItem('token');
 
-// Check if user is already logged in
-if (token) {
-  document.getElementById('auth').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-}
+// Temporarily hide auth for testing - show dashboard directly
+document.getElementById('auth').style.display = 'none';
+document.getElementById('dashboard').style.display = 'block';
 
 async function signup() {
   const username = document.getElementById('username').value;
@@ -98,43 +96,55 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
   try {
     const res = await fetch('/api/items/upload', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
+      // Temporarily removed auth header for testing
       body: formData
     });
     
-    const data = await res.text();
-    alert(data);
+    const data = await res.json();
+    alert(data.message || 'Uploaded!');
+    console.log('Upload response:', data);
     document.getElementById('uploadForm').reset();
     document.getElementById('preview').style.display = 'none';
   } catch (err) {
+    console.error('Upload error:', err);
     alert('Error uploading item: ' + err.message);
   }
 });
 
 async function search() {
   try {
-    const res = await fetch('/api/items/search', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await fetch('/api/items/search');
+    const matches = await res.json();
     
-    const items = await res.json();
+    console.log('Search results:', matches);
     const resultsDiv = document.getElementById('results');
     
-    if (items.length === 0) {
-      resultsDiv.innerHTML = '<p>No items found.</p>';
+    if (matches.length === 0) {
+      resultsDiv.innerHTML = '<p>No matches found. Upload both lost and found items with similar images to test matching!</p>';
       return;
     }
     
-    resultsDiv.innerHTML = items.map(item => `
+    resultsDiv.innerHTML = '<h3>Matches Found:</h3>' + matches.map(match => `
       <div class="item-card">
-        <h3>${item.category} - ${item.type}</h3>
-        <p><strong>Description:</strong> ${item.description || 'N/A'}</p>
-        <p><strong>Location:</strong> ${item.location}</p>
-        <p><strong>Date:</strong> ${new Date(item.date).toLocaleDateString()}</p>
-        ${item.imagePath ? `<img src="/${item.imagePath}" alt="${item.category}">` : ''}
+        <h4>Match Score: ${(match.score * 100).toFixed(1)}%</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div>
+            <h5>Lost: ${match.lost.category}</h5>
+            <p>${match.lost.description || 'No description'}</p>
+            <p><strong>Location:</strong> ${match.lost.location}</p>
+            ${match.lost.imagePath ? `<img src="/${match.lost.imagePath}" alt="Lost item" style="max-width: 200px;">` : ''}
+          </div>
+          <div>
+            <h5>Found: ${match.found.category}</h5>
+            <p>${match.found.description || 'No description'}</p>
+            <p><strong>Location:</strong> ${match.found.location}</p>
+            ${match.found.imagePath ? `<img src="/${match.found.imagePath}" alt="Found item" style="max-width: 200px;">` : ''}
+          </div>
+        </div>
       </div>
     `).join('');
   } catch (err) {
+    console.error('Search error:', err);
     alert('Error searching items: ' + err.message);
   }
 }
