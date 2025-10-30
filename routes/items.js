@@ -61,33 +61,45 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       });
       
       pythonProcess.on('close', (code) => {
-        if (code !== 0) {
-          console.error('Python script error:', stderrData);
-          reject(new Error(`Python script exited with code ${code}: ${stderrData}`));
-        } else {
-          try {
-            const embeddings = JSON.parse(stdoutData);
-            
-            // Validate embeddings
-            if (!Array.isArray(embeddings) || embeddings.length === 0) {
-              throw new Error('No embeddings generated');
-            }
-            
-            if (typeof embeddings[0] !== 'number') {
-              throw new Error(`Invalid embedding format - expected numbers, got ${typeof embeddings[0]}`);
-            }
-            
-            console.log('✅ Embeddings generated:', embeddings.length, 'dimensions');
-            console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
-            
-            resolve(embeddings);
-          } catch (parseErr) {
-            reject(new Error(`Failed to parse embeddings: ${parseErr.message}. Output: ${stdoutData}`));
+        console.log(`Python process exited with code ${code}`);
+        
+        // Try to parse the result even if exit code is non-zero
+        try {
+          const result = JSON.parse(stdoutData.trim());
+          
+          // Check if result contains an error
+          if (result.error || !result.success) {
+            console.error('❌ Python script returned error:', result.error);
+            reject(new Error(`AI processing failed: ${result.error}`));
+            return;
           }
+          
+          // Extract embeddings from result
+          const embeddings = result.embeddings;
+          
+          // Validate embeddings
+          if (!Array.isArray(embeddings) || embeddings.length === 0) {
+            throw new Error('No embeddings generated');
+          }
+          
+          if (typeof embeddings[0] !== 'number') {
+            throw new Error(`Invalid embedding format - expected numbers, got ${typeof embeddings[0]}`);
+          }
+          
+          console.log('✅ Embeddings generated:', embeddings.length, 'dimensions');
+          console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
+          
+          resolve(embeddings);
+        } catch (parseErr) {
+          console.error('❌ Failed to parse Python output:', parseErr.message);
+          console.error('Python stdout:', stdoutData);
+          console.error('Python stderr:', stderrData);
+          reject(new Error(`Failed to parse embeddings: ${parseErr.message}`));
         }
       });
       
       pythonProcess.on('error', (err) => {
+        console.error('❌ Python process error:', err.message);
         reject(new Error(`Failed to start Python process: ${err.message}`));
       });
     });
@@ -106,6 +118,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     
     await item.save();
     console.log('✅ Item saved to database:', item._id);
+    console.log('   - Type:', type);
+    console.log('   - Category:', category);
+    console.log('   - Image size:', originalImageBuffer.length, 'bytes');
+    console.log('   - Embeddings dimensions:', embeddings.length);
     
     // Clean up temporary file
     try {
@@ -115,7 +131,11 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       console.warn('⚠️ Could not delete temp file:', cleanupErr.message);
     }
     
-    res.status(201).json({ message: 'Item uploaded successfully', itemId: item._id });
+    res.status(201).json({ 
+      message: 'Item uploaded successfully', 
+      itemId: item._id,
+      embeddings: embeddings.length 
+    });
   } catch (err) {
     console.error('❌ Upload error:', err.message);
     console.error('Full error:', err);

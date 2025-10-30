@@ -11,6 +11,10 @@ import sys
 import json
 import os
 
+# Set to use CPU only and limit threads to avoid memory issues
+torch.set_num_threads(1)
+os.environ['OMP_NUM_THREADS'] = '1'
+
 def get_embeddings(image_path):
     """
     Generate embeddings for an image using Vision Transformer (ViT)
@@ -19,17 +23,24 @@ def get_embeddings(image_path):
         image_path: Path to the image file
         
     Returns:
-        List of floats representing the image embeddings
+        Dictionary with embeddings or error message
     """
+    if not os.path.exists(image_path):
+        return {"error": "Image file not found", "success": False}
+    
     try:
         # Load pre-trained ViT model and feature extractor
         print(f"Loading ViT model...", file=sys.stderr)
         extractor = ViTFeatureExtractor.from_pretrained('google/vit-base-patch16-224')
         model = ViTModel.from_pretrained('google/vit-base-patch16-224')
+        model.eval()  # Set to evaluation mode
         
         # Load and preprocess image
         print(f"Processing image: {image_path}", file=sys.stderr)
         image = Image.open(image_path).convert('RGB')
+        
+        # Resize to save memory
+        image = image.resize((224, 224))
         
         # Extract features
         inputs = extractor(images=image, return_tensors="pt")
@@ -44,25 +55,31 @@ def get_embeddings(image_path):
         
         print(f"✅ Generated {len(embeddings)} dimensional embeddings", file=sys.stderr)
         
-        return embeddings
+        # Clear memory
+        del model
+        del extractor
+        del outputs
+        torch.cuda.empty_cache() if torch.cuda.is_available() else None
+        
+        return {"embeddings": embeddings, "success": True}
         
     except Exception as e:
-        print(f"❌ Error generating embeddings: {str(e)}", file=sys.stderr)
-        raise
+        error_msg = str(e)
+        print(f"❌ Error generating embeddings: {error_msg}", file=sys.stderr)
+        import traceback
+        traceback.print_exc(file=sys.stderr)
+        return {"error": error_msg, "success": False}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python ai_processor.py <image_path>", file=sys.stderr)
+        result = {"error": "Usage: python ai_processor.py <image_path>", "success": False}
+        print(json.dumps(result))
         sys.exit(1)
     
     image_path = sys.argv[1]
     
-    if not os.path.exists(image_path):
-        print(f"❌ Image file not found: {image_path}", file=sys.stderr)
-        sys.exit(1)
-    
-    # Generate embeddings
-    embeddings = get_embeddings(image_path)
+    # Generate embeddings (handles file existence check internally)
+    result = get_embeddings(image_path)
     
     # Output JSON to stdout (Node.js will read this)
-    print(json.dumps(embeddings))
+    print(json.dumps(result))
