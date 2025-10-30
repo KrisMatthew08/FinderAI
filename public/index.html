@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinderAI - Lost & Found</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>FinderAI - Lost & Found</h1>
+  <p class="privacy-warning">⚠️ Warning: Do not upload images with faces or personal identifying information.</p>
+  
+  <div id="auth">
+    <h2>Login / Signup</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Signup</button>
+  </div>
+  
+  <div id="dashboard" style="display:none;">
+    <h2>Upload Item</h2>
+    <form id="uploadForm">
+      <select id="type">
+        <option value="lost">Lost</option>
+        <option value="found">Found</option>
+      </select>
+      <input id="category" placeholder="Category (e.g., bag, phone, ID)">
+      <input id="description" placeholder="Description">
+      <input id="location" placeholder="Location">
+      <input type="file" id="image" accept="image/*" onchange="previewImage()">
+      <img id="preview" style="max-width: 200px; display: none;">
+      <button type="submit">Upload</button>
+    </form>
+    
+    <h2>Search Matches</h2>
+    <button onclick="search()">Search for Matches</button>
+    <div id="results"></div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>

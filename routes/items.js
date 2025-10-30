@@ -1,23 +1,21 @@
 const express = require('express');
 const multer = require('multer');
 const Item = require('../models/Item');
-const jwt = require('jsonwebtoken');
+const auth = require('../middleware/auth');
 const axios = require('axios');
+const sharp = require('sharp');
+const fs = require('fs').promises;
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' }); // Store images in 'uploads' folder
 
-// Middleware to verify JWT
-const auth = (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) return res.status(401).send('Access denied');
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch (err) {
-    res.status(400).send('Invalid token');
-  }
-};
+// Cosine similarity function for vector comparison
+function cosineSimilarity(vecA, vecB) {
+  const dot = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
+  const magA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
+  const magB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+  return dot / (magA * magB);
+}
 
 // Upload item
 router.post('/upload', auth, upload.single('image'), async (req, res) => {
@@ -25,29 +23,86 @@ router.post('/upload', auth, upload.single('image'), async (req, res) => {
   const imagePath = req.file.path;
 
   try {
-    // AI: Extract features using Hugging Face (simplified)
-    const response = await axios.post('https://api-inference.huggingface.co/models/google/vit-base-patch16-224', 
-      { inputs: imagePath }, // You'd need to send image data properly
-      { headers: { Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}` } }
+    // Process image with sharp
+    const processedImagePath = `${imagePath}_processed.jpg`;
+    await sharp(imagePath)
+      .resize(224, 224) // Resize to ViT input size
+      .jpeg({ quality: 80 })
+      .toFile(processedImagePath);
+    
+    // Read image as base64 for Hugging Face API
+    const imageBuffer = await fs.readFile(processedImagePath);
+    const imageBase64 = imageBuffer.toString('base64');
+    
+    // AI: Extract features using Hugging Face
+    const response = await axios.post(
+      'https://api-inference.huggingface.co/models/google/vit-base-patch16-224',
+      imageBuffer,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          'Content-Type': 'application/octet-stream'
+        }
+      }
     );
-    const embeddings = response.data; // Store feature vector
+    
+    const embeddings = Array.isArray(response.data) ? response.data : [];
 
-    const item = new Item({ type, category, description, location, imagePath, userId: req.user.id, embeddings });
+    const item = new Item({
+      type,
+      category,
+      description,
+      location,
+      imagePath: processedImagePath,
+      userId: req.user.id,
+      embeddings
+    });
+    
     await item.save();
-    res.status(201).send('Item uploaded');
+    res.status(201).send('Item uploaded successfully');
   } catch (err) {
-    res.status(500).send('Error uploading item');
+    console.error('Upload error:', err);
+    res.status(500).send('Error uploading item: ' + err.message);
   }
 });
 
-// Search/Match items (basic similarity check)
+// Search/Match items with similarity scoring
 router.get('/search', auth, async (req, res) => {
   try {
-    const items = await Item.find({ type: 'found' }); // Example: match lost with found
-    // Implement FAISS or cosine similarity here for real matching
-    res.json(items);
+    const userItems = await Item.find({ userId: req.user.id, type: 'lost' });
+    const allFoundItems = await Item.find({ type: 'found' });
+    
+    if (userItems.length === 0) {
+      return res.json([]);
+    }
+    
+    const matches = [];
+    
+    for (const lostItem of userItems) {
+      if (!lostItem.embeddings || lostItem.embeddings.length === 0) continue;
+      
+      for (const foundItem of allFoundItems) {
+        if (!foundItem.embeddings || foundItem.embeddings.length === 0) continue;
+        
+        const similarity = cosineSimilarity(lostItem.embeddings, foundItem.embeddings);
+        
+        if (similarity > 0.7) { // Threshold for matches
+          matches.push({
+            ...foundItem.toObject(),
+            similarity: similarity.toFixed(3),
+            matchedWith: lostItem.category
+          });
+        }
+      }
+    }
+    
+    // Sort by similarity score
+    matches.sort((a, b) => b.similarity - a.similarity);
+    
+    res.json(matches);
   } catch (err) {
-    res.status(500).send('Error searching items');
+    console.error('Search error:', err);
+    res.status(500).send('Error searching items: ' + err.message);
   }
 });
 
