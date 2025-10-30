@@ -49,7 +49,12 @@ FinderAI is an intelligent lost-and-found platform that uses AI-powered image re
    npm install
    ```
 
-3. **Create `.env` file** in the root directory:
+3. **Create `.env` file** in the root directory (copy from `.env.example`):
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Then edit `.env` with your actual credentials:
    ```env
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_random_secret_key
@@ -57,22 +62,37 @@ FinderAI is an intelligent lost-and-found platform that uses AI-powered image re
    PORT=3000
    ```
 
-4. **Get your Hugging Face API key**
+   ⚠️ **IMPORTANT SECURITY NOTES:**
+   - **NEVER commit the `.env` file to GitHub!** It contains sensitive credentials.
+   - The `.env` file is already in `.gitignore` to prevent accidental commits.
+   - If you accidentally exposed credentials, immediately:
+     1. Change your MongoDB Atlas password
+     2. Regenerate your Hugging Face API key
+     3. Generate a new JWT secret
+   - Use environment variables in production (Heroku Config Vars, etc.)
+
+4. **Generate a secure JWT secret** (optional but recommended):
+   ```bash
+   node -p "require('crypto').randomBytes(64).toString('hex')"
+   ```
+   Copy the output to your `.env` file as `JWT_SECRET`
+
+5. **Get your Hugging Face API key**
    - Sign up at [https://huggingface.co](https://huggingface.co)
    - Go to Settings > Access Tokens
    - Create a new token with "Read" permissions
    - Copy the token to your `.env` file
 
-5. **Start MongoDB**
+6. **Start MongoDB**
    - Local: Run `mongod`
    - Atlas: Use your connection string in `.env`
 
-6. **Run the application**
+7. **Run the application**
    ```bash
    npm start
    ```
 
-7. **Open in browser**
+8. **Open in browser**
    - Navigate to `http://localhost:3000`
 
 ## API Endpoints
