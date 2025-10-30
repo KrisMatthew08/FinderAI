@@ -6,6 +6,8 @@ const axios = require('axios');
 const sharp = require('sharp');
 const fs = require('fs').promises;
 const fsSync = require('fs'); // For synchronous file operations
+const { spawn } = require('child_process');
+const path = require('path');
 
 const router = express.Router();
 const upload = multer({ 
@@ -33,57 +35,62 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     // Read the original image file as buffer
     const originalImageBuffer = await fs.readFile(req.file.path);
     
-    // Process image with sharp for AI - resize to 224x224
+    // Process image with sharp for display
     const processedImageBuffer = await sharp(req.file.path)
       .resize(224, 224)
       .jpeg({ quality: 80 })
       .toBuffer();
     
-    console.log('Image processed, sending to Hugging Face API...');
+    console.log('Image processed, generating embeddings locally...');
     
-    // AI: Extract features using Hugging Face - using sentence-transformers for embeddings
-    // Note: sentence-transformers/clip-ViT-B-32 is specifically designed for image embeddings
-    const response = await axios.post(
-      'https://api-inference.huggingface.co/models/sentence-transformers/clip-ViT-B-32',
-      processedImageBuffer,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
-          'Content-Type': 'application/octet-stream'
+    // AI: Generate embeddings using local Python script
+    const embeddings = await new Promise((resolve, reject) => {
+      const pythonScriptPath = path.join(__dirname, '..', 'ai_processor.py');
+      const pythonProcess = spawn('python', [pythonScriptPath, req.file.path]);
+      
+      let stdoutData = '';
+      let stderrData = '';
+      
+      pythonProcess.stdout.on('data', (data) => {
+        stdoutData += data.toString();
+      });
+      
+      pythonProcess.stderr.on('data', (data) => {
+        stderrData += data.toString();
+        console.log('Python:', data.toString().trim());
+      });
+      
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error('Python script error:', stderrData);
+          reject(new Error(`Python script exited with code ${code}: ${stderrData}`));
+        } else {
+          try {
+            const embeddings = JSON.parse(stdoutData);
+            
+            // Validate embeddings
+            if (!Array.isArray(embeddings) || embeddings.length === 0) {
+              throw new Error('No embeddings generated');
+            }
+            
+            if (typeof embeddings[0] !== 'number') {
+              throw new Error(`Invalid embedding format - expected numbers, got ${typeof embeddings[0]}`);
+            }
+            
+            console.log('✅ Embeddings generated:', embeddings.length, 'dimensions');
+            console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
+            
+            resolve(embeddings);
+          } catch (parseErr) {
+            reject(new Error(`Failed to parse embeddings: ${parseErr.message}. Output: ${stdoutData}`));
+          }
         }
-      }
-    );
-    
-    console.log('API response status:', response.status);
-    console.log('API response type:', typeof response.data);
-    console.log('API response structure:', JSON.stringify(response.data).substring(0, 300));
-    
-    // Extract embeddings from response
-    let embeddings = [];
-    
-    if (Array.isArray(response.data)) {
-      // If it's a nested array, flatten it
-      embeddings = Array.isArray(response.data[0]) ? response.data[0] : response.data;
-    } else if (response.data.embeddings) {
-      // Some models return { embeddings: [...] }
-      embeddings = response.data.embeddings;
-    } else if (typeof response.data === 'object') {
-      // Try to extract array from object
-      const values = Object.values(response.data);
-      embeddings = Array.isArray(values[0]) ? values[0] : values;
-    }
-    
-    // Validate embeddings are numbers
-    if (!Array.isArray(embeddings) || embeddings.length === 0) {
-      throw new Error(`No embeddings extracted. Response: ${JSON.stringify(response.data).substring(0, 200)}`);
-    }
-    
-    if (typeof embeddings[0] !== 'number') {
-      throw new Error(`Invalid embedding format - expected numbers, got ${typeof embeddings[0]}. Sample: ${JSON.stringify(embeddings.slice(0, 3))}`);
-    }
-    
-    console.log('✅ Embeddings received:', embeddings.length, 'dimensions');
-    console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
+      });
+      
+      pythonProcess.on('error', (err) => {
+        reject(new Error(`Failed to start Python process: ${err.message}`));
+      });
+    });
 
     // Store item in MongoDB with binary image data
     const item = new Item({
@@ -111,17 +118,17 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     res.status(201).json({ message: 'Item uploaded successfully', itemId: item._id });
   } catch (err) {
     console.error('❌ Upload error:', err.message);
+    console.error('Full error:', err);
     
-    // Log API-specific errors
-    if (err.response) {
-      console.error('API Error Status:', err.response.status);
-      console.error('API Error Data:', err.response.data);
-      return res.status(500).json({ 
-        message: `Hugging Face API error (${err.response.status}): ${JSON.stringify(err.response.data)}` 
-      });
+    // Clean up temp file on error
+    try {
+      if (req.file && req.file.path) {
+        await fs.unlink(req.file.path);
+      }
+    } catch (cleanupErr) {
+      // Ignore cleanup errors
     }
     
-    console.error('Full error:', err);
     res.status(500).json({ message: 'Error uploading item: ' + err.message });
   }
 });
