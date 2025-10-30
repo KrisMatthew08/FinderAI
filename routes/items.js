@@ -32,11 +32,12 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       .jpeg({ quality: 80 })
       .toBuffer();
     
-    console.log('Image processed, sending to Hugging Face CLIP API...');
+    console.log('Image processed, sending to Hugging Face API...');
     
-    // AI: Extract features using Hugging Face CLIP model (designed for embeddings)
+    // AI: Extract features using Hugging Face - using sentence-transformers for embeddings
+    // Note: sentence-transformers/clip-ViT-B-32 is specifically designed for image embeddings
     const response = await axios.post(
-      'https://api-inference.huggingface.co/pipeline/feature-extraction/openai/clip-vit-base-patch32',
+      'https://api-inference.huggingface.co/models/sentence-transformers/clip-ViT-B-32',
       imageBuffer,
       {
         headers: {
@@ -46,23 +47,36 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       }
     );
     
+    console.log('API response status:', response.status);
     console.log('API response type:', typeof response.data);
-    console.log('API response sample:', JSON.stringify(response.data).substring(0, 200));
+    console.log('API response structure:', JSON.stringify(response.data).substring(0, 300));
     
-    // Extract embeddings from response - CLIP returns array directly
+    // Extract embeddings from response
     let embeddings = [];
+    
     if (Array.isArray(response.data)) {
-      // CLIP returns embeddings directly as an array or nested array
+      // If it's a nested array, flatten it
       embeddings = Array.isArray(response.data[0]) ? response.data[0] : response.data;
+    } else if (response.data.embeddings) {
+      // Some models return { embeddings: [...] }
+      embeddings = response.data.embeddings;
+    } else if (typeof response.data === 'object') {
+      // Try to extract array from object
+      const values = Object.values(response.data);
+      embeddings = Array.isArray(values[0]) ? values[0] : values;
     }
     
     // Validate embeddings are numbers
-    if (embeddings.length === 0 || typeof embeddings[0] !== 'number') {
-      throw new Error(`Invalid embeddings format. Got: ${JSON.stringify(response.data).substring(0, 100)}`);
+    if (!Array.isArray(embeddings) || embeddings.length === 0) {
+      throw new Error(`No embeddings extracted. Response: ${JSON.stringify(response.data).substring(0, 200)}`);
     }
     
-    console.log('Embeddings received:', embeddings.length, 'dimensions');
-    console.log('First 5 values:', embeddings.slice(0, 5));
+    if (typeof embeddings[0] !== 'number') {
+      throw new Error(`Invalid embedding format - expected numbers, got ${typeof embeddings[0]}. Sample: ${JSON.stringify(embeddings.slice(0, 3))}`);
+    }
+    
+    console.log('✅ Embeddings received:', embeddings.length, 'dimensions');
+    console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
 
     const item = new Item({
       type,
@@ -75,10 +89,20 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     });
     
     await item.save();
-    console.log('Item saved to database:', item._id);
+    console.log('✅ Item saved to database:', item._id);
     res.status(201).json({ message: 'Item uploaded successfully', itemId: item._id });
   } catch (err) {
-    console.error('Upload error:', err.message);
+    console.error('❌ Upload error:', err.message);
+    
+    // Log API-specific errors
+    if (err.response) {
+      console.error('API Error Status:', err.response.status);
+      console.error('API Error Data:', err.response.data);
+      return res.status(500).json({ 
+        message: `Hugging Face API error (${err.response.status}): ${JSON.stringify(err.response.data)}` 
+      });
+    }
+    
     console.error('Full error:', err);
     res.status(500).json({ message: 'Error uploading item: ' + err.message });
   }
