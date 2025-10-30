@@ -32,11 +32,11 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       .jpeg({ quality: 80 })
       .toBuffer();
     
-    console.log('Image processed, sending to Hugging Face API...');
+    console.log('Image processed, sending to Hugging Face CLIP API...');
     
-    // AI: Extract features using Hugging Face
+    // AI: Extract features using Hugging Face CLIP model (designed for embeddings)
     const response = await axios.post(
-      'https://api-inference.huggingface.co/models/google/vit-base-patch16-224',
+      'https://api-inference.huggingface.co/pipeline/feature-extraction/openai/clip-vit-base-patch32',
       imageBuffer,
       {
         headers: {
@@ -46,17 +46,23 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       }
     );
     
-    // Extract embeddings from response
+    console.log('API response type:', typeof response.data);
+    console.log('API response sample:', JSON.stringify(response.data).substring(0, 200));
+    
+    // Extract embeddings from response - CLIP returns array directly
     let embeddings = [];
     if (Array.isArray(response.data)) {
-      embeddings = response.data.flat(); // Flatten if nested
-    } else if (response.data[0]?.hidden_states) {
-      embeddings = response.data[0].hidden_states[0]; // ViT format
-    } else {
-      embeddings = Object.values(response.data).flat(); // Alternative format
+      // CLIP returns embeddings directly as an array or nested array
+      embeddings = Array.isArray(response.data[0]) ? response.data[0] : response.data;
+    }
+    
+    // Validate embeddings are numbers
+    if (embeddings.length === 0 || typeof embeddings[0] !== 'number') {
+      throw new Error(`Invalid embeddings format. Got: ${JSON.stringify(response.data).substring(0, 100)}`);
     }
     
     console.log('Embeddings received:', embeddings.length, 'dimensions');
+    console.log('First 5 values:', embeddings.slice(0, 5));
 
     const item = new Item({
       type,

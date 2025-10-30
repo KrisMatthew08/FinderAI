@@ -8,7 +8,15 @@ const itemSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   imagePath: String, // Path to uploaded image
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  embeddings: [Number], // AI feature vector for matching
+  embeddings: {
+    type: [Number],
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0 && v.every(num => typeof num === 'number');
+      },
+      message: 'Embeddings must be an array of numbers'
+    }
+  }, // AI feature vector for matching
   matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }] // Potential matches
 });
 
