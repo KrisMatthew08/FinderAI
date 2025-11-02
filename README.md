@@ -26,74 +26,269 @@ FinderAI is an intelligent lost-and-found platform that uses AI-powered image re
 - **Fetch API**: Communication with backend
 
 ### AI/ML
-- **Hugging Face API**: Vision Transformer (ViT) for image embeddings
+- **Python**: Local AI processing with Vision Transformer models
+- **PyTorch & Transformers**: Deep learning framework for image embeddings
+- **PIL & NumPy**: Lightweight feature extraction (color histograms, edge detection)
 - **Cosine Similarity**: Vector comparison for matching
 
 ## Setup Instructions
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB (local installation or MongoDB Atlas account)
-- Hugging Face account (for API key)
 
-### Installation
+Before cloning the repository, make sure you have these installed on your system:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/KrisMatthew08/FinderAI.git
-   cd FinderAI
-   ```
+1. **Node.js** (v16 or higher) - [Download here](https://nodejs.org/)
+2. **Python** (v3.8 to 3.11) - [Download here](https://www.python.org/)
+   - ⚠️ **Important**: Use Python 3.11 or lower (Python 3.12+ may have compatibility issues with PyTorch)
+3. **MongoDB** - Choose one:
+   - **MongoDB Atlas** (Cloud - Recommended for beginners): [Sign up free](https://www.mongodb.com/cloud/atlas)
+   - **MongoDB Local**: [Download Community Edition](https://www.mongodb.com/try/download/community)
+4. **Git** - [Download here](https://git-scm.com/)
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### Installation Steps
 
-3. **Create `.env` file** in the root directory (copy from `.env.example`):
+#### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/KrisMatthew08/FinderAI.git
+cd FinderAI
+```
+
+#### Step 2: Install Node.js Dependencies
+
+```bash
+npm install
+```
+
+This installs all required Node.js packages:
+- express, mongoose, multer, sharp, bcryptjs, jsonwebtoken, dotenv, cors, axios
+
+#### Step 3: Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+This installs:
+- transformers (Hugging Face models)
+- torch (PyTorch for deep learning)
+- pillow (Image processing)
+- numpy (Numerical computations)
+
+**If pip install fails**, try:
+```bash
+python -m pip install -r requirements.txt
+```
+
+**For Windows users**, if you get torch installation errors:
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install transformers pillow numpy
+```
+
+#### Step 4: Create `.env` File
+
+1. **Copy the example file**:
+#### Step 4: Create `.env` File
+
+1. **Copy the example file**:
    ```bash
    cp .env.example .env
    ```
    
-   Then edit `.env` with your actual credentials:
+   **On Windows (PowerShell)**:
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
+2. **Edit the `.env` file** with your actual credentials:
    ```env
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_random_secret_key
-   HUGGINGFACE_API_KEY=your_huggingface_api_key
    PORT=3000
+   DB_NAME=FinderAI
    ```
 
-   ⚠️ **IMPORTANT SECURITY NOTES:**
-   - **NEVER commit the `.env` file to GitHub!** It contains sensitive credentials.
-   - The `.env` file is already in `.gitignore` to prevent accidental commits.
-   - If you accidentally exposed credentials, immediately:
-     1. Change your MongoDB Atlas password
-     2. Regenerate your Hugging Face API key
-     3. Generate a new JWT secret
-   - Use environment variables in production (Heroku Config Vars, etc.)
+3. **Get MongoDB Connection String**:
+   
+   **Option A: MongoDB Atlas (Cloud - Recommended)**
+   - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Sign up for free account
+   - Create a new cluster (free tier available)
+   - Click "Connect" → "Connect your application"
+   - Copy the connection string
+   - Replace `<password>` with your actual password
+   - Replace `<dbname>` with `FinderAI`
+   - Example: `mongodb+srv://username:password@cluster.mongodb.net/FinderAI?retryWrites=true&w=majority`
+   
+   **Option B: MongoDB Local**
+   - Install MongoDB Community Edition
+   - Connection string: `mongodb://localhost:27017/FinderAI`
 
-4. **Generate a secure JWT secret** (optional but recommended):
+4. **Generate JWT Secret**:
    ```bash
    node -p "require('crypto').randomBytes(64).toString('hex')"
    ```
-   Copy the output to your `.env` file as `JWT_SECRET`
+   Copy the output and paste it as `JWT_SECRET` in your `.env` file
 
-5. **Get your Hugging Face API key**
-   - Sign up at [https://huggingface.co](https://huggingface.co)
-   - Go to Settings > Access Tokens
-   - Create a new token with "Read" permissions
-   - Copy the token to your `.env` file
+   ⚠️ **CRITICAL SECURITY WARNINGS:**
+   - **NEVER commit the `.env` file to GitHub!** It's already in `.gitignore`
+   - **NEVER share your `.env` file** or its contents publicly
+   - If you accidentally expose credentials:
+     1. Immediately change your MongoDB password
+     2. Generate a new JWT secret
+     3. Remove the commit from Git history or rotate all credentials
 
-6. **Start MongoDB**
-   - Local: Run `mongod`
-   - Atlas: Use your connection string in `.env`
+#### Step 5: Verify Python Installation
 
-7. **Run the application**
+Test if Python is correctly set up:
+
+```bash
+python --version
+```
+
+Should show Python 3.8-3.11. If it shows Python 2.x or command not found:
+- Windows: Use `py --version` or add Python to PATH
+- Mac/Linux: Use `python3 --version`
+
+Test the AI processor:
+```bash
+python test_python.py
+```
+
+Should print the Python version without errors.
+
+#### Step 6: Start the Application
+
+1. **Make sure MongoDB is running**:
+   - Atlas: Already running (cloud-based)
+   - Local: Run `mongod` in a terminal
+
+2. **Start the Node.js server**:
+   ```bash
+   npm start
+   ```
+   
+   Or:
+   ```bash
+   node server.js
+   ```
+
+3. **Open in browser**:
+   - Navigate to `http://localhost:3000`
+   - You should see the FinderAI interface
+
+4. **Verify everything works**:
+   - Upload a test image (lost item)
+   - Upload another similar image (found item)
+   - Click "Search for Matches"
+   - You should see matches with similarity scores
+
+---
+
+## Deploying to GitHub
+
+### First Time Setup (For Your Own Copy)
+
+1. **Create a new repository on GitHub**:
+   - Go to [GitHub](https://github.com)
+   - Click "New repository"
+   - Name it (e.g., "FinderAI" or "my-finder-app")
+   - Choose Public or Private
+   - **DO NOT** initialize with README (you already have one)
+   - Click "Create repository"
+
+2. **Link your local project to GitHub**:
+   ```bash
+   git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   ```
+   
+   Replace `YOUR_USERNAME` and `YOUR_REPO_NAME` with your actual GitHub username and repository name.
+
+3. **Push your code**:
+   ```bash
+   git add .
+   git commit -m "Initial commit of FinderAI"
+   git push -u origin main
+   ```
+
+### Making Changes and Updating GitHub
+
+1. **Make your changes** to the code
+
+2. **Check what files changed**:
+   ```bash
+   git status
+   ```
+
+3. **Stage your changes**:
+   ```bash
+   git add .
+   ```
+   
+   Or add specific files:
+   ```bash
+   git add filename.js
+   ```
+
+4. **Commit your changes**:
+   ```bash
+   git commit -m "Brief description of what you changed"
+   ```
+
+5. **Push to GitHub**:
+   ```bash
+   git push
+   ```
+
+### Important: What NOT to Push
+
+The following are automatically ignored (in `.gitignore`):
+- ✅ `.env` (contains secrets)
+- ✅ `node_modules/` (too large, reinstalled with npm install)
+- ✅ `uploads/` (user uploaded images)
+- ✅ `__pycache__/` (Python cache files)
+
+**Always include**:
+- ✅ `.env.example` (template without real credentials)
+- ✅ `package.json` (lists dependencies)
+- ✅ `requirements.txt` (Python dependencies)
+- ✅ All source code files
+- ✅ README.md
+
+### For Others to Clone Your Repository
+
+Share these instructions with others:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+   cd YOUR_REPO_NAME
+   ```
+
+2. **Install Node.js dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Install Python dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Create `.env` file**:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Then edit `.env` with their own MongoDB connection and JWT secret (see Step 4 above)
+
+5. **Run the application**:
    ```bash
    npm start
    ```
 
-8. **Open in browser**
-   - Navigate to `http://localhost:3000`
+---
 
 ## API Endpoints
 
@@ -115,25 +310,141 @@ FinderAI is an intelligent lost-and-found platform that uses AI-powered image re
   ```
 
 ### Items
-- `POST /api/items/upload` - Upload lost/found item (requires authentication)
-  - Headers: `Authorization: Bearer <token>`
+- `POST /api/items/upload` - Upload lost/found item (authentication temporarily disabled for testing)
   - Body: FormData with fields:
     - `type`: "lost" or "found"
-    - `category`: string
+    - `category`: string (e.g., "Wallet", "Phone", "Keys")
     - `description`: string
-    - `location`: string
-    - `image`: file
+    - `location`: string (where it was lost/found)
+    - `image`: file (JPEG, PNG - max 5MB)
 
-- `GET /api/items/search` - Search for matching items (requires authentication)
-  - Headers: `Authorization: Bearer <token>`
+- `GET /api/items/search` - Search for matching items (authentication temporarily disabled for testing)
   - Returns: Array of matching items with similarity scores
+  - Only returns unclaimed items
+
+- `GET /api/items/image/:id` - Get image for a specific item
+  - Returns: Image binary data
+
+- `DELETE /api/items/delete/:id` - Delete an item
+  - Returns: Confirmation message
+
+- `PUT /api/items/claim/:id` - Mark an item as claimed/reunited
+  - Returns: Updated item with claimed status
 
 ## Usage
 
-1. **Sign up** for an account or **login**
-2. **Upload** a lost or found item with an image
-3. **Search** to find potential matches based on AI similarity
-4. View matches with similarity scores to identify your item
+1. **Upload a lost item**:
+   - Select "Lost" as type
+   - Enter category (e.g., "Wallet")
+   - Add description and location
+   - Upload clear image of the item
+
+2. **Upload a found item**:
+   - Select "Found" as type
+   - Enter same category (e.g., "Wallet")
+   - Add description and location
+   - Upload image
+
+3. **Search for matches**:
+   - Click "Search for Matches"
+   - AI will compare all lost and found items
+   - Results show similarity scores (higher = better match)
+
+4. **Manage items**:
+   - **Mark as Claimed**: When item is reunited with owner
+   - **Delete**: Remove item permanently
+
+## How the AI Works
+
+FinderAI uses two AI approaches:
+
+### 1. **Simple Feature Extractor** (Default - Stable)
+- Uses PIL and NumPy (lightweight, no GPU needed)
+- Extracts 112-dimensional feature vectors:
+  - **Color Histogram** (48 features): Overall color distribution
+  - **Regional Colors** (48 features): 4×4 grid spatial layout
+  - **Edge Detection** (16 features): Shape and texture patterns
+- Fast and reliable for most lost & found items
+
+### 2. **Vision Transformer (ViT)** (Advanced - Optional)
+- Uses Hugging Face Transformers + PyTorch
+- 768-dimensional embeddings
+- More accurate but requires more memory
+- May crash on some Windows systems
+
+### Matching Algorithm
+- **Cosine Similarity**: Compares feature vectors
+- **Threshold**: 0.5 (50% similarity or higher)
+- Results sorted by similarity score (highest first)
+
+## Troubleshooting
+
+### Python Issues
+
+**"python: command not found"**
+- Windows: Try `py` instead of `python`
+- Add Python to system PATH
+- Reinstall Python with "Add to PATH" checked
+
+**"No module named 'PIL'"**
+```bash
+pip install pillow
+```
+
+**PyTorch installation fails**
+- Use CPU-only version (smaller, faster):
+  ```bash
+  pip install torch --index-url https://download.pytorch.org/whl/cpu
+  ```
+
+**"Exit code 3221226505" (Windows crash)**
+- This is a PyTorch memory issue on Windows
+- The app automatically uses the simple feature extractor instead
+- No action needed - it will work fine!
+
+### MongoDB Issues
+
+**"MongoServerError: db already exists with different case"**
+- Make sure `DB_NAME` in `.env` matches exactly: `FinderAI` (not `finderai`)
+
+**"Connection refused" or "Cannot connect to MongoDB"**
+- **Atlas**: Check your IP is whitelisted (Network Access in Atlas dashboard)
+- **Local**: Make sure `mongod` is running
+- Check connection string format in `.env`
+
+### Node.js Issues
+
+**"Cannot find module 'express'"**
+```bash
+npm install
+```
+
+**Port 3000 already in use**
+- Change `PORT` in `.env` to another number (e.g., 3001)
+- Or stop the other process using port 3000
+
+**Images not showing**
+- Clear browser cache
+- Check uploads are working in terminal logs
+- Verify MongoDB connection is active
+
+### Git Issues
+
+**"Permission denied (publickey)"**
+- Set up SSH keys: [GitHub SSH Guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
+- Or use HTTPS URLs instead of SSH
+
+**Accidentally committed `.env` file**
+1. Remove from Git:
+   ```bash
+   git rm --cached .env
+   git commit -m "Remove .env from repository"
+   git push
+   ```
+2. **Immediately change all credentials** in `.env`
+3. Add to `.gitignore` if not already there
+
+---
 
 ## Privacy & Ethics
 
@@ -148,36 +459,55 @@ FinderAI is an intelligent lost-and-found platform that uses AI-powered image re
 ```
 FinderAI/
 ├── middleware/
-│   └── auth.js           # JWT authentication middleware
+│   └── auth.js              # JWT authentication middleware
 ├── models/
-│   ├── User.js           # User schema
-│   └── Item.js           # Item schema with embeddings
+│   ├── User.js              # User schema
+│   └── Item.js              # Item schema with embeddings and claimed status
 ├── routes/
-│   ├── auth.js           # Authentication routes
-│   └── items.js          # Item upload and search routes
+│   ├── auth.js              # Authentication routes
+│   └── items.js             # Upload, search, delete, claim routes
 ├── public/
-│   ├── index.html        # Frontend HTML
-│   ├── style.css         # Styles
-│   └── app.js            # Frontend JavaScript
-├── uploads/              # Uploaded images directory
-├── server.js             # Main server file
-├── package.json          # Dependencies
-└── .env                  # Environment variables (not in repo)
+│   ├── index.html           # Frontend HTML
+│   ├── style.css            # Styles
+│   └── app.js               # Frontend JavaScript
+├── uploads/                 # Temporary image storage (not in Git)
+├── ai_processor.py          # ViT-based embeddings (advanced)
+├── ai_processor_simple.py   # Simple feature extractor (default)
+├── test_python.py           # Python environment test
+├── server.js                # Main server file
+├── package.json             # Node.js dependencies
+├── requirements.txt         # Python dependencies
+├── .env                     # Environment variables (NOT in Git)
+├── .env.example             # Template for .env
+├── .gitignore               # Files to exclude from Git
+└── README.md                # This file
 ```
 
 ## Future Enhancements
 
+- [ ] Re-enable JWT authentication for production
 - [ ] Implement FAISS for faster similarity search at scale
 - [ ] Add face detection to automatically reject uploads with faces
-- [ ] Email notifications for matches
-- [ ] Admin dashboard for monitoring
+- [ ] Email/SMS notifications when matches are found
+- [ ] User dashboard to view their uploaded items
+- [ ] Admin panel for monitoring and moderation
 - [ ] Mobile app (React Native)
 - [ ] Real-time updates with WebSockets
 - [ ] Multi-language support
+- [ ] Location-based filtering
+- [ ] Item categories with custom icons
+- [ ] Export match reports as PDF
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! To contribute:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Commit: `git commit -m "Add feature description"`
+5. Push: `git push origin feature-name`
+6. Open a Pull Request
 
 ## License
 
@@ -185,14 +515,53 @@ ISC
 
 ## Author
 
-KrisMatthew08
+**KrisMatthew08**
+- GitHub: [@KrisMatthew08](https://github.com/KrisMatthew08)
 
 ## Acknowledgments
 
-- Hugging Face for providing the Vision Transformer API
-- MongoDB for database services
-- Express.js community
+- **Hugging Face** for Transformers library and pre-trained models
+- **MongoDB** for database services
+- **Express.js** community for excellent web framework
+- **PyTorch** team for deep learning framework
+- All open-source contributors
 
 ---
 
-**Note**: This is a student project for educational purposes. For production use, additional security measures and optimizations are recommended.
+## Quick Reference Commands
+
+### Development
+```bash
+npm start              # Start the server
+node server.js         # Alternative way to start
+python test_python.py  # Test Python environment
+```
+
+### Git Commands
+```bash
+git status             # Check what files changed
+git add .              # Stage all changes
+git commit -m "msg"    # Commit with message
+git push               # Push to GitHub
+git pull               # Get latest changes
+```
+
+### Package Management
+```bash
+npm install            # Install Node.js packages
+npm install <package>  # Add new Node package
+pip install -r requirements.txt  # Install Python packages
+pip freeze > requirements.txt    # Update requirements.txt
+```
+
+### MongoDB
+```bash
+mongod                 # Start local MongoDB
+mongo                  # Open MongoDB shell
+```
+
+---
+
+**Note**: This project uses local Python-based AI processing for better reliability and privacy. The system works offline once dependencies are installed. For production deployment, consider using cloud-based AI services or GPU servers for better performance at scale.
+
+**Security Reminder**: Always keep your `.env` file secure and never commit it to version control. Rotate credentials regularly and use environment-specific configurations for development, staging, and production.
