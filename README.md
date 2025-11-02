@@ -186,42 +186,22 @@ Should print the Python version without errors.
 
 ---
 
-## Deploying to GitHub
+## Working with GitHub
 
-### First Time Setup (For Your Own Copy)
+### This Repository is Already on GitHub!
 
-1. **Create a new repository on GitHub**:
-   - Go to [GitHub](https://github.com)
-   - Click "New repository"
-   - Name it (e.g., "FinderAI" or "my-finder-app")
-   - Choose Public or Private
-   - **DO NOT** initialize with README (you already have one)
-   - Click "Create repository"
-
-2. **Link your local project to GitHub**:
-   ```bash
-   git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   ```
-   
-   Replace `YOUR_USERNAME` and `YOUR_REPO_NAME` with your actual GitHub username and repository name.
-
-3. **Push your code**:
-   ```bash
-   git add .
-   git commit -m "Initial commit of FinderAI"
-   git push -u origin main
-   ```
+The FinderAI project is already hosted at: **https://github.com/KrisMatthew08/FinderAI**
 
 ### Making Changes and Updating GitHub
 
-1. **Make your changes** to the code
+When you make changes to the code:
 
-2. **Check what files changed**:
+1. **Check what files changed**:
    ```bash
    git status
    ```
 
-3. **Stage your changes**:
+2. **Stage your changes**:
    ```bash
    git add .
    ```
@@ -231,20 +211,20 @@ Should print the Python version without errors.
    git add filename.js
    ```
 
-4. **Commit your changes**:
+3. **Commit your changes**:
    ```bash
    git commit -m "Brief description of what you changed"
    ```
 
-5. **Push to GitHub**:
+4. **Push to GitHub**:
    ```bash
-   git push
+   git push origin main
    ```
 
 ### Important: What NOT to Push
 
 The following are automatically ignored (in `.gitignore`):
-- ✅ `.env` (contains secrets)
+- ✅ `.env` (contains secrets - NEVER push this!)
 - ✅ `node_modules/` (too large, reinstalled with npm install)
 - ✅ `uploads/` (user uploaded images)
 - ✅ `__pycache__/` (Python cache files)
@@ -253,17 +233,17 @@ The following are automatically ignored (in `.gitignore`):
 - ✅ `.env.example` (template without real credentials)
 - ✅ `package.json` (lists dependencies)
 - ✅ `requirements.txt` (Python dependencies)
-- ✅ All source code files
+- ✅ All source code files (.js, .py, .html, .css)
 - ✅ README.md
 
-### For Others to Clone Your Repository
+### For Others to Clone This Repository
 
-Share these instructions with others:
+Anyone can clone and run FinderAI with these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   cd YOUR_REPO_NAME
+   git clone https://github.com/KrisMatthew08/FinderAI.git
+   cd FinderAI
    ```
 
 2. **Install Node.js dependencies**:
@@ -276,16 +256,49 @@ Share these instructions with others:
    pip install -r requirements.txt
    ```
 
-4. **Create `.env` file**:
+4. **Create `.env` file** (copy from example):
    ```bash
    cp .env.example .env
    ```
    
-   Then edit `.env` with their own MongoDB connection and JWT secret (see Step 4 above)
+   **Windows (PowerShell)**:
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+   
+   Then edit `.env` with their own:
+   - MongoDB connection string (see Step 4 in Installation above)
+   - JWT secret (generate with: `node -p "require('crypto').randomBytes(64).toString('hex')"`)
 
 5. **Run the application**:
    ```bash
    npm start
+   ```
+
+6. **Open browser**: Navigate to `http://localhost:3000`
+
+### If You Want Your Own Copy (Fork)
+
+If you want to create your own version of FinderAI:
+
+1. **Fork the repository** on GitHub:
+   - Go to https://github.com/KrisMatthew08/FinderAI
+   - Click the "Fork" button (top right)
+   - This creates a copy under your GitHub account
+
+2. **Clone your forked repository**:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/FinderAI.git
+   cd FinderAI
+   ```
+
+3. **Follow the installation steps** above
+
+4. **Make your changes** and push to your fork:
+   ```bash
+   git add .
+   git commit -m "Your changes"
+   git push origin main
    ```
 
 ---
