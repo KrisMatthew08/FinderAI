@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,8 @@ app.use('/api/items', require('./routes/items'));
 
 // Serve static files from the public directory
 app.use(express.static('public'));
+// Serve CSS files
+app.use('/styles', express.static(path.join(__dirname, 'public', 'styles')));
 // Serve uploaded images
 app.use('/uploads', express.static('uploads'));
 

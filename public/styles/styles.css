@@ -1,0 +1,180 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #c9c4c1;
+}
+
+/* Intro Section */
+.intro-section {
+    font-family: "Lora", serif;
+    position: relative;
+    text-align: center;
+    color: #f7efda;
+}
+
+nav {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background-color: #733015;
+  border: 1px solid #f7efda;
+  border-radius: 30px;
+  padding: 1rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+nav ul{
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    list-style: none;
+}
+
+nav ul li a{
+    text-decoration: none;
+    color: #f7efda;
+    font-weight: bold;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+nav ul li a:hover{
+    color: #800505;
+    font-size: 19px;
+    transform: scale(1.05);
+}
+
+.intro-section {
+  background-color: #e2dfdf;
+  color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100vh;
+  padding: 40px 20px;
+  font-family: "Lora", serif;
+}
+
+.intro-content {
+  max-width: 800px;
+}
+
+.intro-content h1 {
+  color: #b50000;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.intro-content p {
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.center-logo {
+  width: 180px;
+  margin: 20px 0;
+}
+
+.socials {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+.socials img {
+  width: 35px;
+  transition: transform 0.3s ease;
+}
+
+.socials img:hover {
+  transform: scale(1.1);
+}
+
+.order-btn {
+    padding: 12px 30px;
+    margin-top: 20px;
+    font-family: "Bricolage Grotesque", sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    background-color: #800505;
+    color: #f7efda;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.order-btn:hover {
+    background-color: #f7efda;
+    color: #800505;
+    transform: scale(1.05);
+}
+
+.lfsection {
+    background: #800505;
+    font-family: "Bricolage Grotesque", sans-serif;
+    padding: 40px 20px;
+    text-align: center;
+    color: #3c2415;
+}
+
+.best-sellers h3 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #47532b;
+    text-align: start;
+    margin-left: 30px;
+}
+
+.lostnclaim-categories {
+    margin-top: 40px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 30px 0 20px;
+}
+
+.tab {
+    font-weight: bold;
+    cursor: pointer;
+    color: #733015;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    padding: 5px 10px;
+}
+
+.tab:hover {
+    color: #ac0000;
+    font-size: 19px;
+    border-bottom: 2px solid #f1f1ef;
+    transform: scale(1.05);
+}
+
+.tab.active {
+    border-bottom: 2px solid #ac0000;
+}
+
+.tab.active:hover {
+    border-bottom:2px solid #f1f1ef;
+}

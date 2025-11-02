@@ -1,43 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinderAI - Lost & Found</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finder AI - Home</title>
+
+    <!--custom fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-  <h1>FinderAI - Lost & Found</h1>
-  <p class="privacy-warning">⚠️ Warning: Do not upload images with faces or personal identifying information.</p>
-  
-  <div id="auth">
-    <h2>Login / Signup</h2>
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <button onclick="signup()">Signup</button>
+<nav>
+    <ul>
+        <li><a href="#home">HOME</a></li>
+        <li><a href="#about">ABOUT</a> </li>
+        <li><a href="#logout">LOG OUT</a> </li>
+        <li><a href="#contact">CONTACT US</a> </li>
+        <li><a href="#help">HELP</a> </li>
+    </ul>
+</nav>
+
+<section class="intro-section">
+  <div class="intro-content">
+    <h1>FINDER AI:<br>Lost objects, found hope</h1>
+    <p>
+      Unite owners and their valuables with instant, accurate, and secure matching using the most advanced AI platform
+    </p>
+
+    <img src="mapuamalayan-removebg-preview.png" alt="Logo" class="center-logo">
+
+    <div class="socials">
+      <a href="#"><img src="mail.png" alt="Mail"></a>
+      <a href="#"><img src="location.png" alt="Location"></a>
+      <a href="#"><img src="telephone.png" alt="Phone"></a>
+    </div>
+
+    <button class="order-btn">FIND NOW</button>
   </div>
-  
-  <div id="dashboard" style="display:none;">
-    <h2>Upload Item</h2>
-    <form id="uploadForm">
-      <select id="type">
-        <option value="lost">Lost</option>
-        <option value="found">Found</option>
-      </select>
-      <input id="category" placeholder="Category (e.g., bag, phone, ID)">
-      <input id="description" placeholder="Description">
-      <input id="location" placeholder="Location">
-      <input type="file" id="image" accept="image/*" onchange="previewImage()">
-      <img id="preview" style="max-width: 200px; display: none;">
-      <button type="submit">Upload</button>
-    </form>
-    
-    <h2>Search Matches</h2>
-    <button onclick="search()">Search for Matches</button>
-    <div id="results"></div>
-  </div>
-  
-  <script src="app.js"></script>
+</section>
+
+        <!-- Categories -->
+        <div class="lostnclaim-categories">
+            <div class="tabs">
+                <span class="tab active" id="lostTab">Report Found Item</span>
+                <span class="tab" id="claimTab">Report Lost Item</span>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Tab click handlers - navigate to respective pages
+        document.getElementById('lostTab').addEventListener('click', function() {
+            window.location.href = 'lostitem.html';
+        });
+        
+        document.getElementById('claimTab').addEventListener('click', function() {
+            window.location.href = 'claimitem.html';
+        });
+        
+        // FIND NOW button scroll or navigate
+        document.querySelector('.order-btn').addEventListener('click', function() {
+            document.querySelector('.lostnclaim-categories').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+
 </body>
+
 </html>
+
+
+
+
