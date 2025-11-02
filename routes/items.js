@@ -170,10 +170,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
 // Search/Match items with similarity scoring (auth temporarily removed for testing)
 router.get('/search', async (req, res) => {
   try {
-    const lostItems = await Item.find({ type: 'lost' });
-    const foundItems = await Item.find({ type: 'found' });
+    const lostItems = await Item.find({ type: 'lost', claimed: false });
+    const foundItems = await Item.find({ type: 'found', claimed: false });
     
-    console.log(`Found ${lostItems.length} lost items and ${foundItems.length} found items`);
+    console.log(`Found ${lostItems.length} lost items and ${foundItems.length} found items (unclaimed only)`);
     
     if (lostItems.length === 0 || foundItems.length === 0) {
       return res.json([]);
@@ -258,6 +258,27 @@ router.delete('/delete/:id', async (req, res) => {
   } catch (err) {
     console.error('❌ Delete error:', err);
     res.status(500).json({ message: 'Error deleting item: ' + err.message });
+  }
+});
+
+// Mark item as claimed (auth temporarily removed for testing)
+router.put('/claim/:id', async (req, res) => {
+  try {
+    const item = await Item.findByIdAndUpdate(
+      req.params.id, 
+      { claimed: true }, 
+      { new: true }
+    );
+    
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    
+    console.log('✅ Item claimed:', req.params.id);
+    res.json({ message: 'Item marked as claimed successfully', item });
+  } catch (err) {
+    console.error('❌ Claim error:', err);
+    res.status(500).json({ message: 'Error claiming item: ' + err.message });
   }
 });
 

@@ -18,7 +18,8 @@ const itemSchema = new mongoose.Schema({
       message: 'Embeddings must be an array of numbers'
     }
   }, // AI feature vector for matching
-  matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }] // Potential matches
+  matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }], // Potential matches
+  claimed: { type: Boolean, default: false } // Mark if item has been claimed/reunited
 });
 
 module.exports = mongoose.model('Item', itemSchema);
