@@ -25,6 +25,7 @@
         <li><a href="#about">ABOUT</a></li>
         <li><a href="#contact">CONTACT US</a></li>
         <li><a href="#help">HELP</a></li>
+        <li id="adminLink" style="display: none;"><a href="admin.html" style="color: #ff6b6b;">ADMIN</a></li>
         <li id="authLink"><a href="login.html">LOGIN</a></li>
     </ul>
 </nav>
@@ -256,6 +257,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token');
         const authLink = document.getElementById('authLink');
+        const adminLink = document.getElementById('adminLink');
         
         if (token && authLink) {
             // User is logged in, verify token
@@ -279,6 +281,11 @@
                     <span style="color: #f7efda; margin: 0 10px;">|</span>
                     <a href="#" id="logoutBtn" style="color: #ff6b6b;">LOGOUT</a>
                 `;
+                
+                // Show ADMIN button if user is admin
+                if (data.user.role === 'admin') {
+                    adminLink.style.display = 'block';
+                }
                 
                 // Handle logout
                 document.getElementById('logoutBtn').addEventListener('click', function(e) {

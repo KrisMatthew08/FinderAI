@@ -74,7 +74,7 @@
       <p><strong>Student ID:</strong> <span id="userStudentId">—</span></p>
     </div>
 
-    <div class="button-group" aria-label="Dashboard actions">
+    <div class="button-group" aria-label="Dashboard actions" id="dashboardButtons">
       <a href="index.html" class="btn" style="background: linear-gradient(135deg,#733015,#8b4513);"><i class="fa-solid fa-home"></i> Home</a>
       <a href="index.html#forms-section" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Report Found Item</a>
       <a href="index.html#forms-section" class="btn"><i class="fa-solid fa-hand-holding-heart"></i> Report Lost Item</a>
@@ -117,6 +117,18 @@
         document.getElementById('userFullName').textContent = `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim() || '—';
         document.getElementById('userEmail').textContent = data.user.email || '—';
         document.getElementById('userStudentId').textContent = data.user.studentId || '—';
+
+        // Add Admin Panel button if user is admin
+        if (data.user.role === 'admin') {
+          const buttonGroup = document.getElementById('dashboardButtons');
+          const adminBtn = document.createElement('a');
+          adminBtn.href = 'admin.html';
+          adminBtn.className = 'btn';
+          adminBtn.style.background = 'linear-gradient(135deg,#800505,#d32f2f)';
+          adminBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Admin Panel';
+          // Insert before logout button
+          buttonGroup.insertBefore(adminBtn, buttonGroup.lastElementChild);
+        }
 
       } catch (error) {
         console.error('Auth error:', error);

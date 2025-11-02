@@ -282,4 +282,44 @@ router.put('/claim/:id', async (req, res) => {
   }
 });
 
+// Admin: Get all items (including claimed ones)
+router.get('/all', async (req, res) => {
+  try {
+    const items = await Item.find({}).sort({ createdAt: -1 });
+    console.log(`✅ Retrieved ${items.length} items for admin`);
+    res.json(items);
+  } catch (err) {
+    console.error('❌ Error fetching all items:', err);
+    res.status(500).json({ message: 'Error fetching items: ' + err.message });
+  }
+});
+
+// Admin: Update item details
+router.put('/update/:id', async (req, res) => {
+  try {
+    const { category, location, description, type } = req.body;
+    
+    const item = await Item.findByIdAndUpdate(
+      req.params.id,
+      { 
+        category, 
+        location, 
+        description, 
+        type 
+      },
+      { new: true }
+    );
+    
+    if (!item) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    
+    console.log('✅ Item updated:', req.params.id);
+    res.json({ message: 'Item updated successfully', item });
+  } catch (err) {
+    console.error('❌ Update error:', err);
+    res.status(500).json({ message: 'Error updating item: ' + err.message });
+  }
+});
+
 module.exports = router;
