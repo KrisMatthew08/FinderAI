@@ -133,12 +133,14 @@ async function search() {
             <p>${match.lost.description || 'No description'}</p>
             <p><strong>Location:</strong> ${match.lost.location}</p>
             <img src="/api/items/image/${match.lost.id}" alt="Lost item" style="max-width: 200px;" onerror="this.style.display='none'">
+            <button class="delete-btn" onclick="deleteItem('${match.lost.id}')">Delete Lost Item</button>
           </div>
           <div>
             <h5>Found: ${match.found.category}</h5>
             <p>${match.found.description || 'No description'}</p>
             <p><strong>Location:</strong> ${match.found.location}</p>
             <img src="/api/items/image/${match.found.id}" alt="Found item" style="max-width: 200px;" onerror="this.style.display='none'">
+            <button class="delete-btn" onclick="deleteItem('${match.found.id}')">Delete Found Item</button>
           </div>
         </div>
       </div>
@@ -146,5 +148,29 @@ async function search() {
   } catch (err) {
     console.error('Search error:', err);
     alert('Error searching items: ' + err.message);
+  }
+}
+
+async function deleteItem(id) {
+  // Confirm before deleting
+  if (!confirm('Are you sure you want to delete this item?')) {
+    return;
+  }
+  
+  try {
+    const res = await fetch(`/api/items/delete/${id}`, {
+      method: 'DELETE',
+      // Auth header temporarily removed for testing
+      // headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await res.json();
+    alert(data.message);
+    
+    // Refresh search results after deletion
+    search();
+  } catch (err) {
+    console.error('Delete error:', err);
+    alert('Error deleting item: ' + err.message);
   }
 }
