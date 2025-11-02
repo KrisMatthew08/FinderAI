@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | FinderAI</title>
+  <link rel="stylesheet" href="styles/auth.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body class="home-bg">
+  <div class="overlay"></div>
+
+  <div class="form-container">
+    <h2>Login</h2>
+    <p>Welcome back! Please log in to your FinderAI account.</p>
+
+    <form id="loginForm">
+      <input type="email" name="email" id="email" placeholder="Email" required /><br />
+
+      <!-- Password Field with Toggle -->
+      <div class="password-container">
+        <input
+          type="password"
+          name="password"
+          id="loginPassword"
+          placeholder="Password"
+          required
+        />
+        <i
+          class="fa-solid fa-eye toggle-password"
+          id="toggleLoginPassword"
+          onclick="togglePassword('loginPassword', 'toggleLoginPassword')"
+        ></i>
+      </div>
+
+      <button type="submit" class="btn red">Login</button>
+    </form>
+
+    <p class="alt">Don't have an account? <a href="register.html">Register</a></p>
+  </div>
+
+  <!-- MMCM logo (bottom right, clickable) -->
+  <a href="https://mcm.edu.ph/" target="_blank">
+    <img src="assets/mmcm_logo.png" alt="MMCM Logo" class="corner-logo" />
+  </a>
+
+  <script src="scripts/auth.js"></script>
+  <script>
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Store token in localStorage
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('userName', data.user.firstName);
+          localStorage.setItem('userEmail', data.user.email);
+          
+          showPopup('Login successful! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        } else {
+          showPopup(data.message || 'Login failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        showPopup('Error: ' + error.message, 'error');
+      }
+    });
+
+    // Check for registration success message
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('registered') === 'success') {
+      showPopup('✅ Registration successful! You can now log in.', 'success');
+    }
+  </script>
+</body>
+</html>

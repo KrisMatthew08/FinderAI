@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | FinderAI</title>
+  <link rel="stylesheet" href="styles/auth.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+</head>
+<body class="home-bg">
+  <div class="overlay"></div>
+
+  <div class="form-container">
+    <h2>Register</h2>
+    <p>Create your FinderAI account</p>
+
+    <form id="registerForm">
+      <input type="text" name="student_id" id="student_id" placeholder="Student ID" required /><br />
+      <input type="text" name="first_name" id="first_name" placeholder="First Name" required /><br />
+      <input type="text" name="last_name" id="last_name" placeholder="Last Name" required /><br />
+      <input type="email" name="email" id="email" placeholder="Email" required /><br />
+
+      <!-- Password Field -->
+      <div class="password-container">
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Password"
+          required
+        />
+        <i
+          class="fa-solid fa-eye toggle-password"
+          id="togglePasswordIcon"
+          onclick="togglePassword('password', 'togglePasswordIcon')"
+        ></i>
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="password-container">
+        <input
+          type="password"
+          name="confirm_password"
+          id="confirm_password"
+          placeholder="Confirm Password"
+          required
+        />
+        <i
+          class="fa-solid fa-eye toggle-password"
+          id="toggleConfirmIcon"
+          onclick="togglePassword('confirm_password', 'toggleConfirmIcon')"
+        ></i>
+      </div>
+
+      <p id="passwordWarning" style="color: #ff6b6b; font-size: 0.9rem; display: none; margin-top: 5px;">
+        ⚠️ Passwords do not match.
+      </p>
+
+      <button type="submit" class="btn red">Register</button>
+    </form>
+
+    <p class="alt">Already have an account? <a href="login.html">Login</a></p>
+  </div>
+
+  <a href="https://mcm.edu.ph/" target="_blank">
+    <img src="assets/mmcm_logo.png" alt="MMCM Logo" class="corner-logo" />
+  </a>
+
+  <script src="scripts/auth.js"></script>
+  <script>
+    // Password match check
+    const pass = document.getElementById("password");
+    const confirm = document.getElementById("confirm_password");
+    const warning = document.getElementById("passwordWarning");
+    const form = document.getElementById("registerForm");
+
+    function checkPasswords() {
+      if (confirm.value === "") {
+        warning.style.display = "none";
+        return;
+      }
+      if (pass.value !== confirm.value) {
+        warning.style.display = "block";
+      } else {
+        warning.style.display = "none";
+      }
+    }
+
+    pass.addEventListener("input", checkPasswords);
+    confirm.addEventListener("input", checkPasswords);
+
+    // Handle registration form submission
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      if (pass.value !== confirm.value) {
+        showPopup("Passwords do not match!", "error");
+        return;
+      }
+
+      const formData = {
+        studentId: document.getElementById('student_id').value,
+        firstName: document.getElementById('first_name').value,
+        lastName: document.getElementById('last_name').value,
+        email: document.getElementById('email').value,
+        password: pass.value
+      };
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showPopup('✅ Registration successful! Redirecting to login...', 'success');
+          setTimeout(() => {
+            window.location.href = 'login.html?registered=success';
+          }, 1500);
+        } else {
+          showPopup(data.message || 'Registration failed. Please try again.', 'error');
+        }
+      } catch (error) {
+        showPopup('Error: ' + error.message, 'error');
+      }
+    });
+
+    // Check for error parameters
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "exists") {
+      showPopup("⚠️ Email already exists. Try logging in instead.", "error");
+    }
+  </script>
+</body>
+</html>

@@ -10,17 +10,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
     <!-- External CSS -->
     <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/lostitem.css">
+    <link rel="stylesheet" href="styles/claimitem.css">
 </head>
 <body>
 <nav>
     <ul>
         <li><a href="#home">HOME</a></li>
-        <li><a href="#about">ABOUT</a> </li>
-        <li><a href="#logout">LOG OUT</a> </li>
-        <li><a href="#contact">CONTACT US</a> </li>
-        <li><a href="#help">HELP</a> </li>
+        <li><a href="#about">ABOUT</a></li>
+        <li><a href="#contact">CONTACT US</a></li>
+        <li><a href="#help">HELP</a></li>
+        <li id="authLink"><a href="login.html">LOGIN</a></li>
     </ul>
 </nav>
 
@@ -31,45 +36,267 @@
       Unite owners and their valuables with instant, accurate, and secure matching using the most advanced AI platform
     </p>
 
-    <img src="mapuamalayan-removebg-preview.png" alt="Logo" class="center-logo">
+    <img src="assets/mmcm_logo.png" alt="MMCM Logo" class="center-logo">
 
     <div class="socials">
-      <a href="#"><img src="mail.png" alt="Mail"></a>
-      <a href="#"><img src="location.png" alt="Location"></a>
-      <a href="#"><img src="telephone.png" alt="Phone"></a>
+      <a href="mailto:finderai@mcm.edu.ph"><i class="fa-solid fa-envelope" style="font-size: 35px; color: #733015;"></i></a>
+      <a href="https://maps.app.goo.gl/YourLocationLink"><i class="fa-solid fa-location-dot" style="font-size: 35px; color: #733015;"></i></a>
+      <a href="tel:+639123456789"><i class="fa-solid fa-phone" style="font-size: 35px; color: #733015;"></i></a>
     </div>
 
     <button class="order-btn">FIND NOW</button>
   </div>
 </section>
 
-        <!-- Categories -->
-        <div class="lostnclaim-categories">
-            <div class="tabs">
-                <span class="tab active" id="lostTab">Report Found Item</span>
-                <span class="tab" id="claimTab">Report Lost Item</span>
-            </div>
+<!-- Categories with Tab Content -->
+<section class="forms-section" id="forms-section">
+    <div class="lostnclaim-categories">
+        <div class="tabs">
+            <span class="tab active" id="lostTab">Report Found Item</span>
+            <span class="tab" id="claimTab">Report Lost Item</span>
         </div>
+    </div>
+
+    <!-- Found Item Form (Initially visible) -->
+    <section class="lostfile-section tab-content active" id="foundItemContent">
+        <h2>Report a Found Item</h2>
+        <form id="foundItemForm" enctype="multipart/form-data">
+            <input type="file" accept="image/*" id="foundImageInput" name="image" required>
+            <label for="foundImageInput">Upload Image of Found Item</label>
+
+            <label for="foundCategorySelect">Category:</label>
+            <select id="foundCategorySelect" name="category" required>
+                <option value="">Select Category</option>
+                <option value="Wallet">Wallet</option>
+                <option value="Phone">Phone</option>
+                <option value="Keys">Keys</option>
+                <option value="Bag">Bag</option>
+                <option value="ID">ID/Card</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Jewelry">Jewelry</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="foundLocText">Location Found:</label>
+            <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
+
+            <label for="foundDescText">Description:</label>
+            <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
+
+            <label for="founderText">Your Name:</label>
+            <textarea id="founderText" name="founderName" rows="1" placeholder="Full Name" required></textarea>
+
+            <button type="submit" class="submitbtn">Submit Found Item</button>
+        </form>
     </section>
 
-    <script>
-        // Tab click handlers - navigate to respective pages
-        document.getElementById('lostTab').addEventListener('click', function() {
-            window.location.href = 'lostitem.html';
-        });
+    <!-- Lost Item Form (Initially hidden) -->
+    <section class="lostfile-section tab-content" id="lostItemContent">
+        <h2>Report a Lost Item</h2>
+        <form id="lostItemForm" enctype="multipart/form-data">
+            <input type="file" accept="image/*" id="lostImageInput" name="image" required>
+            <label for="lostImageInput">Upload Image of Lost Item</label>
+
+            <label for="lostCategorySelect">Category:</label>
+            <select id="lostCategorySelect" name="category" required>
+                <option value="">Select Category</option>
+                <option value="Wallet">Wallet</option>
+                <option value="Phone">Phone</option>
+                <option value="Keys">Keys</option>
+                <option value="Bag">Bag</option>
+                <option value="ID">ID/Card</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Jewelry">Jewelry</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="lostLocText">Location Last Seen:</label>
+            <textarea id="lostLocText" name="location" rows="3" placeholder="e.g., Mapua Cafeteria, near entrance" required></textarea>
+
+            <label for="lostDescText">Description:</label>
+            <textarea id="lostDescText" name="description" rows="3" placeholder="Describe your lost item (color, brand, unique features, etc.)" required></textarea>
+
+            <label for="claimerText">Your Name:</label>
+            <textarea id="claimerText" name="claimerName" rows="1" placeholder="Full Name" required></textarea>
+
+            <label for="schoolEmail">School Email:</label>
+            <input type="email" id="schoolEmail" name="schoolEmail" placeholder="your.name@mymail.mapua.edu.ph" required>
+
+            <label for="schoolID">School ID:</label>
+            <input type="text" id="schoolID" name="schoolID" placeholder="e.g., 2022100123" required>
+
+            <button type="submit" class="submitbtn">Submit Lost Item</button>
+        </form>
+    </section>
+</section>
+
+<!-- Popup for Found Items -->
+<div id="foundPopup" class="popup">
+    <div class="popup-content">
+        <p>Please surrender this to the Lost and Found Desk.</p>
+        <button id="closeFoundPopup">OK</button>
+    </div>
+</div>
+
+<!-- Popup for Lost Items -->
+<div id="lostPopup" class="popup">
+    <div class="popup-content">
+        <p>We'll send you a confirmation shortly.</p>
+        <button id="closeLostPopup">OK</button>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    const lostTab = document.getElementById('lostTab');
+    const claimTab = document.getElementById('claimTab');
+    const foundItemContent = document.getElementById('foundItemContent');
+    const lostItemContent = document.getElementById('lostItemContent');
+
+    lostTab.addEventListener('click', function() {
+        // Switch to Found Item tab
+        lostTab.classList.add('active');
+        claimTab.classList.remove('active');
+        foundItemContent.classList.add('active');
+        lostItemContent.classList.remove('active');
+    });
+
+    claimTab.addEventListener('click', function() {
+        // Switch to Lost Item tab
+        claimTab.classList.add('active');
+        lostTab.classList.remove('active');
+        lostItemContent.classList.add('active');
+        foundItemContent.classList.remove('active');
+    });
+
+    // FIND NOW button scroll
+    document.querySelector('.order-btn').addEventListener('click', function() {
+        document.querySelector('.forms-section').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Found Item Form Submission
+    const foundForm = document.getElementById("foundItemForm");
+    const foundPopup = document.getElementById("foundPopup");
+    const closeFoundPopupBtn = document.getElementById("closeFoundPopup");
+
+    foundForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
         
-        document.getElementById('claimTab').addEventListener('click', function() {
-            window.location.href = 'claimitem.html';
-        });
+        const formData = new FormData();
+        formData.append('type', 'found');
+        formData.append('category', document.getElementById('foundCategorySelect').value);
+        formData.append('location', document.getElementById('foundLocText').value);
+        formData.append('description', document.getElementById('foundDescText').value);
+        formData.append('image', document.getElementById('foundImageInput').files[0]);
         
-        // FIND NOW button scroll or navigate
-        document.querySelector('.order-btn').addEventListener('click', function() {
-            document.querySelector('.lostnclaim-categories').scrollIntoView({ behavior: 'smooth' });
-        });
-    </script>
+        try {
+            const response = await fetch('/api/items/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                foundPopup.style.display = "flex";
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('Error submitting form: ' + error.message);
+        }
+    });
+
+    closeFoundPopupBtn.addEventListener("click", function() {
+        foundPopup.style.display = "none";
+        foundForm.reset();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Lost Item Form Submission
+    const lostForm = document.getElementById("lostItemForm");
+    const lostPopup = document.getElementById("lostPopup");
+    const closeLostPopupBtn = document.getElementById("closeLostPopup");
+
+    lostForm.addEventListener("submit", async function(event) {
+        event.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('type', 'lost');
+        formData.append('category', document.getElementById('lostCategorySelect').value);
+        formData.append('location', document.getElementById('lostLocText').value);
+        formData.append('description', document.getElementById('lostDescText').value);
+        formData.append('image', document.getElementById('lostImageInput').files[0]);
+        
+        try {
+            const response = await fetch('/api/items/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                lostPopup.style.display = "flex";
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('Error submitting form: ' + error.message);
+        }
+    });
+
+    closeLostPopupBtn.addEventListener("click", function() {
+        lostPopup.style.display = "none";
+        lostForm.reset();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Check if user is logged in on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const token = localStorage.getItem('token');
+        const authLink = document.getElementById('authLink');
+        
+        if (token && authLink) {
+            // User is logged in, verify token
+            fetch('/api/auth/verify', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    // Token is invalid, remove it
+                    localStorage.removeItem('token');
+                    throw new Error('Invalid token');
+                }
+                return res.json();
+            })
+            .then(data => {
+                // Replace LOGIN with DASHBOARD and LOGOUT
+                authLink.innerHTML = `
+                    <a href="dashboard.html">DASHBOARD</a>
+                    <span style="color: #f7efda; margin: 0 10px;">|</span>
+                    <a href="#" id="logoutBtn" style="color: #ff6b6b;">LOGOUT</a>
+                `;
+                
+                // Handle logout
+                document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userEmail');
+                    window.location.reload();
+                });
+            })
+            .catch(err => {
+                console.error('Auth verification failed:', err);
+            });
+        }
+    });
+</script>
 
 </body>
-
 </html>
 
 

@@ -5,31 +5,103 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-// Signup
-router.post('/signup', async (req, res) => {
-  const { username, password } = req.body;
+// Register
+router.post('/register', async (req, res) => {
+  const { studentId, firstName, lastName, email, password } = req.body;
+  
   try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { studentId }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email or Student ID already exists' });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword });
+    
+    // Create new user
+    const user = new User({
+      studentId,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword
+    });
+    
     await user.save();
-    res.status(201).send('User created');
+    
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    res.status(500).send('Error creating user');
+    console.error('Registration error:', err);
+    res.status(500).json({ message: 'Error creating user' });
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
+  
   try {
-    const user = await User.findOne({ username });
-    if (!user || !await bcrypt.compare(password, user.password)) {
-      return res.status(401).send('Invalid credentials');
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ token });
+
+    // Compare password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user._id,
+        email: user.email,
+        studentId: user.studentId 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        studentId: user.studentId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (err) {
-    res.status(500).send('Error logging in');
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Error logging in' });
+  }
+});
+
+// Verify token (for protected routes)
+router.get('/verify', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (err) {
+    console.error('Token verification error:', err);
+    res.status(401).json({ message: 'Invalid token' });
   }
 });
 

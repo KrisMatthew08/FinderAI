@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | FinderAI</title>
+  <link rel="stylesheet" href="styles/auth.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Dashboard-specific glassy styling */
+    .dashboard-wrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      padding: 36px 30px;
+      text-align: center;
+      width: 380px;
+      color: #fff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.08);
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+    .dashboard-wrapper h1 { font-size: 1.6rem; margin-bottom: 10px; }
+    .dashboard-wrapper p.subtitle { font-size: 0.95rem; color: #f1f1f1; margin-bottom: 20px; line-height:1.4; }
+    .profile-info {
+      text-align: left;
+      line-height: 1.6;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .profile-info p { margin:6px 0; color:#fff; }
+    .profile-info strong { color:#ffb400; }
+    .button-group { display:flex; flex-direction:column; gap:10px; }
+    .btn, .logout-btn {
+      text-decoration:none;
+      width:100%;
+      padding:10px 12px;
+      border-radius:20px;
+      text-align:center;
+      font-weight:600;
+      letter-spacing:0.4px;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+    .btn { background: linear-gradient(135deg,#d32f2f,#e53935); color:#fff; }
+    .btn:hover { transform:translateY(-3px); }
+    .logout-btn { background: linear-gradient(135deg,#b71c1c,#d32f2f); color:#fff; }
+    @media (max-width:480px){ .dashboard-wrapper { width:92%; padding:28px 18px } }
+  </style>
+</head>
+<body class="home-bg">
+  <div class="overlay"></div>
+
+  <div class="dashboard-wrapper" role="main" aria-labelledby="welcomeHeading">
+    <h1 id="welcomeHeading">Welcome back, <span id="userName">User</span>! 👋</h1>
+
+    <p class="subtitle">
+      FinderAI helps students, staff, and instructors easily submit or claim lost items.
+      It's your smart Lost & Found assistant at Mapúa Malayan Colleges Mindanao.
+    </p>
+
+    <div class="profile-info" aria-live="polite">
+      <p><strong>Name:</strong> <span id="userFullName">—</span></p>
+      <p><strong>Email:</strong> <span id="userEmail">—</span></p>
+      <p><strong>Student ID:</strong> <span id="userStudentId">—</span></p>
+    </div>
+
+    <div class="button-group" aria-label="Dashboard actions">
+      <a href="index.html" class="btn" style="background: linear-gradient(135deg,#733015,#8b4513);"><i class="fa-solid fa-home"></i> Home</a>
+      <a href="index.html#forms-section" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Report Found Item</a>
+      <a href="index.html#forms-section" class="btn"><i class="fa-solid fa-hand-holding-heart"></i> Report Lost Item</a>
+      <button onclick="logout()" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </div>
+  </div>
+
+  <a href="https://mcm.edu.ph/" target="_blank" rel="noopener">
+    <img src="assets/mmcm_logo.png" alt="MMCM Logo" class="corner-logo">
+  </a>
+
+  <script src="scripts/auth.js"></script>
+  <script>
+    // Check authentication on page load
+    async function checkAuth() {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      try {
+        // Verify token with backend
+        const response = await fetch('/api/auth/verify', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Invalid token');
+        }
+
+        const data = await response.json();
+        
+        // Populate user info
+        document.getElementById('userName').textContent = data.user.firstName || 'User';
+        document.getElementById('userFullName').textContent = `${data.user.firstName || ''} ${data.user.lastName || ''}`.trim() || '—';
+        document.getElementById('userEmail').textContent = data.user.email || '—';
+        document.getElementById('userStudentId').textContent = data.user.studentId || '—';
+
+      } catch (error) {
+        console.error('Auth error:', error);
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+      showPopup('Logged out successfully', 'success');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 1000);
+    }
+
+    // Run auth check when page loads
+    checkAuth();
+  </script>
+</body>
+</html>
