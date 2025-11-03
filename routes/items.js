@@ -23,12 +23,20 @@ function cosineSimilarity(vecA, vecB) {
   return dot / (magA * magB);
 }
 
-// Upload item (auth temporarily removed for testing)
-router.post('/upload', upload.single('image'), async (req, res) => {
-  const { type, category, description, location } = req.body;
+// Upload item (with authentication)
+router.post('/upload', auth, upload.single('image'), async (req, res) => {
+  const { type, category, description, location, dateFound, dateLost } = req.body;
+  
+  // Debug authentication
+  console.log('🔑 Auth user:', req.user);
+  console.log('   - Student ID:', req.user?.studentId);
   
   if (!req.file) {
     return res.status(400).json({ message: 'No image uploaded' });
+  }
+  
+  if (!req.user || !req.user.studentId) {
+    return res.status(401).json({ message: 'Authentication failed - missing student ID' });
   }
 
   try {
@@ -41,14 +49,14 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       .jpeg({ quality: 80 })
       .toBuffer();
     
-    console.log('Image processed, generating embeddings locally...');
+    console.log('Image processed, generating embeddings with AI...');
     
-    // AI: Generate embeddings using local Python script
-    // Try simple processor first (more stable), fallback to ViT if needed
+    // AI: Use enhanced processor (768 dimensions - ViT-like)
+    console.log('🤖 Using Enhanced Computer Vision Processor (768D)...');
+    const enhancedScriptPath = path.join(__dirname, '..', 'ai_processor_enhanced.py');
+    
     const embeddings = await new Promise((resolve, reject) => {
-      const pythonScriptPath = path.join(__dirname, '..', 'ai_processor_simple.py');
-      console.log('Using simple feature extractor:', pythonScriptPath);
-      const pythonProcess = spawn('python', [pythonScriptPath, req.file.path]);
+      const pythonProcess = spawn('python', [enhancedScriptPath, req.file.path]);
       
       let stdoutData = '';
       let stderrData = '';
@@ -59,62 +67,31 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       
       pythonProcess.stderr.on('data', (data) => {
         stderrData += data.toString();
-        console.log('Python:', data.toString().trim());
+        // Log Python stderr for debugging
+        console.log(data.toString().trim());
       });
       
       pythonProcess.on('close', (code) => {
-        console.log(`Python process exited with code ${code}`);
-        console.log('Python stdout length:', stdoutData.length, 'bytes');
-        
-        // Check if we got any output
-        if (!stdoutData || stdoutData.trim().length === 0) {
-          console.error('❌ No output from Python script');
-          console.error('Python stderr:', stderrData);
-          reject(new Error(`Python script produced no output. Exit code: ${code}`));
+        if (code !== 0 || !stdoutData || stdoutData.trim().length === 0) {
+          reject(new Error(`Enhanced processor failed with code ${code}`));
           return;
         }
         
-        // Try to parse the result
         try {
-          const trimmedOutput = stdoutData.trim();
-          console.log('Parsing JSON output (first 100 chars):', trimmedOutput.substring(0, 100));
-          
-          const result = JSON.parse(trimmedOutput);
-          
-          // Check if result contains an error
-          if (result.error || !result.success) {
-            console.error('❌ Python script returned error:', result.error);
-            reject(new Error(`AI processing failed: ${result.error}`));
+          const result = JSON.parse(stdoutData.trim());
+          if (result.error || !result.success || !result.embeddings) {
+            reject(new Error(`Enhanced processor returned error: ${result.error}`));
             return;
           }
-          
-          // Extract embeddings from result
-          const embeddings = result.embeddings;
-          
-          // Validate embeddings
-          if (!Array.isArray(embeddings) || embeddings.length === 0) {
-            throw new Error('No embeddings generated');
-          }
-          
-          if (typeof embeddings[0] !== 'number') {
-            throw new Error(`Invalid embedding format - expected numbers, got ${typeof embeddings[0]}`);
-          }
-          
-          console.log('✅ Embeddings generated:', embeddings.length, 'dimensions');
-          console.log('Sample values:', embeddings.slice(0, 5).map(n => n.toFixed(4)));
-          
-          resolve(embeddings);
-        } catch (parseErr) {
-          console.error('❌ Failed to parse Python output:', parseErr.message);
-          console.error('Raw stdout:', stdoutData);
-          console.error('Python stderr:', stderrData);
-          reject(new Error(`Failed to parse embeddings: ${parseErr.message}`));
+          console.log(`✅ Enhanced processor success: ${result.embeddings.length} dimensions`);
+          resolve(result.embeddings);
+        } catch (err) {
+          reject(new Error(`Enhanced processor parse error: ${err.message}`));
         }
       });
       
       pythonProcess.on('error', (err) => {
-        console.error('❌ Python process error:', err.message);
-        reject(new Error(`Failed to start Python process: ${err.message}`));
+        reject(new Error(`Enhanced processor process error: ${err.message}`));
       });
     });
 
@@ -124,9 +101,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
       category,
       description,
       location,
+      dateReported: type === 'found' ? (dateFound || new Date()) : (dateLost || new Date()), // Use dateFound or dateLost based on type
+      studentId: req.user.studentId, // Get studentId from authenticated user
       image: originalImageBuffer, // Store original image as binary
       imageType: req.file.mimetype, // Store MIME type (e.g., 'image/jpeg')
-      userId: null, // Temporarily null for testing
       embeddings
     });
     
@@ -134,6 +112,8 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     console.log('✅ Item saved to database:', item._id);
     console.log('   - Type:', type);
     console.log('   - Category:', category);
+    console.log('   - Date Reported:', item.dateReported);
+    console.log('   - Student ID:', req.user.studentId);
     console.log('   - Image size:', originalImageBuffer.length, 'bytes');
     console.log('   - Embeddings dimensions:', embeddings.length);
     

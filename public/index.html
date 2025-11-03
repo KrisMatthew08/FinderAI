@@ -64,6 +64,9 @@
         <form id="foundItemForm" enctype="multipart/form-data">
             <input type="file" accept="image/*" id="foundImageInput" name="image" required>
             <label for="foundImageInput">Upload Image of Found Item</label>
+            <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+            </div>
 
             <label for="foundCategorySelect">Category:</label>
             <select id="foundCategorySelect" name="category" required>
@@ -81,11 +84,11 @@
             <label for="foundLocText">Location Found:</label>
             <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
 
+            <label for="foundDateInput">Date Found:</label>
+            <input type="date" id="foundDateInput" name="dateFound" required>
+
             <label for="foundDescText">Description:</label>
             <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
-
-            <label for="founderText">Your Name:</label>
-            <textarea id="founderText" name="founderName" rows="1" placeholder="Full Name" required></textarea>
 
             <button type="submit" class="submitbtn">Submit Found Item</button>
         </form>
@@ -97,6 +100,9 @@
         <form id="lostItemForm" enctype="multipart/form-data">
             <input type="file" accept="image/*" id="lostImageInput" name="image" required>
             <label for="lostImageInput">Upload Image of Lost Item</label>
+            <div id="lostImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                <img id="lostPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+            </div>
 
             <label for="lostCategorySelect">Category:</label>
             <select id="lostCategorySelect" name="category" required>
@@ -114,17 +120,11 @@
             <label for="lostLocText">Location Last Seen:</label>
             <textarea id="lostLocText" name="location" rows="3" placeholder="e.g., Mapua Cafeteria, near entrance" required></textarea>
 
+            <label for="lostDateInput">Date Lost:</label>
+            <input type="date" id="lostDateInput" name="dateLost" required>
+
             <label for="lostDescText">Description:</label>
             <textarea id="lostDescText" name="description" rows="3" placeholder="Describe your lost item (color, brand, unique features, etc.)" required></textarea>
-
-            <label for="claimerText">Your Name:</label>
-            <textarea id="claimerText" name="claimerName" rows="1" placeholder="Full Name" required></textarea>
-
-            <label for="schoolEmail">School Email:</label>
-            <input type="email" id="schoolEmail" name="schoolEmail" placeholder="your.name@mymail.mapua.edu.ph" required>
-
-            <label for="schoolID">School ID:</label>
-            <input type="text" id="schoolID" name="schoolID" placeholder="e.g., 2022100123" required>
 
             <button type="submit" class="submitbtn">Submit Lost Item</button>
         </form>
@@ -134,6 +134,7 @@
 <!-- Popup for Found Items -->
 <div id="foundPopup" class="popup">
     <div class="popup-content">
+        <h3 style="color: #28a745; margin-bottom: 15px;">✓ Submit Success!</h3>
         <p>Please surrender this to the Lost and Found Desk.</p>
         <button id="closeFoundPopup">OK</button>
     </div>
@@ -142,12 +143,39 @@
 <!-- Popup for Lost Items -->
 <div id="lostPopup" class="popup">
     <div class="popup-content">
+        <h3 style="color: #28a745; margin-bottom: 15px;">✓ Submit Success!</h3>
         <p>We'll send you a confirmation shortly.</p>
         <button id="closeLostPopup">OK</button>
     </div>
 </div>
 
 <script>
+    // Image preview for Found Item
+    document.getElementById('foundImageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('foundPreviewImg').src = event.target.result;
+                document.getElementById('foundImagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Image preview for Lost Item
+    document.getElementById('lostImageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('lostPreviewImg').src = event.target.result;
+                document.getElementById('lostImagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
     // Tab switching functionality
     const lostTab = document.getElementById('lostTab');
     const claimTab = document.getElementById('claimTab');
@@ -183,16 +211,28 @@
     foundForm.addEventListener("submit", async function(event) {
         event.preventDefault();
         
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please login to report an item');
+            window.location.href = 'login.html';
+            return;
+        }
+        
         const formData = new FormData();
         formData.append('type', 'found');
         formData.append('category', document.getElementById('foundCategorySelect').value);
         formData.append('location', document.getElementById('foundLocText').value);
         formData.append('description', document.getElementById('foundDescText').value);
+        formData.append('dateFound', document.getElementById('foundDateInput').value);
         formData.append('image', document.getElementById('foundImageInput').files[0]);
         
         try {
             const response = await fetch('/api/items/upload', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData
             });
             
@@ -211,6 +251,9 @@
     closeFoundPopupBtn.addEventListener("click", function() {
         foundPopup.style.display = "none";
         foundForm.reset();
+        // Clear image preview
+        document.getElementById('foundImagePreview').style.display = 'none';
+        document.getElementById('foundPreviewImg').src = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -222,16 +265,28 @@
     lostForm.addEventListener("submit", async function(event) {
         event.preventDefault();
         
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please login to report an item');
+            window.location.href = 'login.html';
+            return;
+        }
+        
         const formData = new FormData();
         formData.append('type', 'lost');
         formData.append('category', document.getElementById('lostCategorySelect').value);
         formData.append('location', document.getElementById('lostLocText').value);
         formData.append('description', document.getElementById('lostDescText').value);
+        formData.append('dateLost', document.getElementById('lostDateInput').value);
         formData.append('image', document.getElementById('lostImageInput').files[0]);
         
         try {
             const response = await fetch('/api/items/upload', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 body: formData
             });
             
@@ -250,6 +305,9 @@
     closeLostPopupBtn.addEventListener("click", function() {
         lostPopup.style.display = "none";
         lostForm.reset();
+        // Clear image preview
+        document.getElementById('lostImagePreview').style.display = 'none';
+        document.getElementById('lostPreviewImg').src = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 

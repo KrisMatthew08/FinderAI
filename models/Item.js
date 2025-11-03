@@ -5,10 +5,11 @@ const itemSchema = new mongoose.Schema({
   category: { type: String, required: true }, // e.g., 'bag', 'ID'
   description: String,
   location: String,
-  date: { type: Date, default: Date.now },
+  studentId: String, // Student ID of the user who reported the item
+  dateReported: { type: Date, required: true }, // Date when item was found/lost
+  createdAt: { type: Date, default: Date.now }, // When reported to system
   image: { type: Buffer, required: true }, // Store image as binary data
   imageType: { type: String, required: true }, // MIME type (e.g., 'image/jpeg')
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   embeddings: {
     type: [Number],
     validate: {

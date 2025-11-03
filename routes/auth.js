@@ -9,10 +9,13 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   const { studentId, firstName, lastName, email, password } = req.body;
   
+  console.log('📝 Registration attempt:', { studentId, firstName, lastName, email });
+  
   try {
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { studentId }] });
     if (existingUser) {
+      console.log('❌ User already exists');
       return res.status(400).json({ message: 'Email or Student ID already exists' });
     }
 
@@ -29,11 +32,13 @@ router.post('/register', async (req, res) => {
     });
     
     await user.save();
+    console.log('✅ User registered:', email);
     
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
-    console.error('Registration error:', err);
-    res.status(500).json({ message: 'Error creating user' });
+    console.error('❌ Registration error:', err);
+    console.error('Error details:', err.message);
+    res.status(500).json({ message: 'Error creating user', error: err.message });
   }
 });
 
