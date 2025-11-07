@@ -485,6 +485,54 @@
       }
     }
 
+    /* Toast Notification */
+    .toast-notification {
+      position: fixed;
+      top: 100px;
+      right: 30px;
+      background: white;
+      color: #333;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+      min-width: 300px;
+      font-weight: 600;
+    }
+    .toast-success {
+      border-left: 4px solid #4CAF50;
+    }
+    .toast-error {
+      border-left: 4px solid #f44336;
+    }
+    .toast-info {
+      border-left: 4px solid #2196F3;
+    }
+    .toast-notification.fade-out {
+      animation: slideOut 0.3s ease;
+    }
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
     /* Small mobile devices */
     @media (max-width: 480px) {
       .admin-header h1 {
@@ -505,6 +553,12 @@
 
       .stat-card p {
         font-size: 0.8rem;
+      }
+
+      .toast-notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
       }
 
       .filter-btn {
@@ -880,11 +934,11 @@
 
         if (!response.ok) throw new Error('Update failed');
 
-        alert('Item updated successfully!');
+        showToast('Item updated successfully!', 'success');
         closeEditModal();
-        loadItems();
+        loadItems(); // Auto-refresh without blocking
       } catch (error) {
-        alert('Error updating item: ' + error.message);
+        showToast('Error updating item: ' + error.message, 'error');
       }
     });
 
@@ -900,10 +954,10 @@
 
         if (!response.ok) throw new Error('Claim failed');
 
-        alert('Item marked as claimed!');
-        loadItems();
+        showToast('Item marked as claimed!', 'success');
+        loadItems(); // Auto-refresh without blocking
       } catch (error) {
-        alert('Error claiming item: ' + error.message);
+        showToast('Error claiming item: ' + error.message, 'error');
       }
     }
 
@@ -919,10 +973,10 @@
 
         if (!response.ok) throw new Error('Delete failed');
 
-        alert('Item deleted successfully!');
-        loadItems();
+        showToast('Item deleted successfully!', 'success');
+        loadItems(); // Auto-refresh without blocking
       } catch (error) {
-        alert('Error deleting item: ' + error.message);
+        showToast('Error deleting item: ' + error.message, 'error');
       }
     }
 
@@ -1040,6 +1094,33 @@
     // Close matches modal
     function closeMatchesModal() {
       document.getElementById('matchesModal').style.display = 'none';
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+      // Remove existing toast if any
+      const existingToast = document.querySelector('.toast-notification');
+      if (existingToast) {
+        existingToast.remove();
+      }
+
+      // Create toast element
+      const toast = document.createElement('div');
+      toast.className = `toast-notification toast-${type}`;
+      toast.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
 
     // Logout

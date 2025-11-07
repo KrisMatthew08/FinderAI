@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const Item = require('../models/Item');
+const User = require('../models/User');
 const auth = require('../middleware/auth');
 const axios = require('axios');
 const sharp = require('sharp');
@@ -313,6 +314,11 @@ router.get('/my-items', auth, async (req, res) => {
     
     console.log(`✅ Found ${items.length} items for user`);
     
+    // Log item statuses for debugging
+    items.forEach(item => {
+      console.log(`📦 Item ${item._id}: status=${item.status}, matchedWith=${item.matchedWith}, type=${item.type}, category=${item.category}`);
+    });
+    
     // Convert images to base64 for frontend
     const itemsWithBase64 = items.map(item => {
       const itemObj = item.toObject();
@@ -345,6 +351,11 @@ router.get('/my-matches', auth, async (req, res) => {
       return res.json({ matches: [] });
     }
     
+    // Get dismissed matches for this user
+    const DismissedMatch = require('../models/DismissedMatch');
+    const dismissedMatches = await DismissedMatch.find({ studentId });
+    const dismissedIds = new Set(dismissedMatches.map(dm => dm.dismissedItemId.toString()));
+    
     const matches = [];
     
     // For each user's item, find potential matches
@@ -363,6 +374,12 @@ router.get('/my-matches', auth, async (req, res) => {
       
       // Calculate similarity for each potential match
       for (const potentialMatch of potentialMatches) {
+        // Skip if this match was dismissed by the user
+        if (dismissedIds.has(potentialMatch._id.toString())) {
+          console.log('⏭️ Skipping dismissed match:', potentialMatch._id);
+          continue;
+        }
+        
         // Check if both items have embeddings
         if (!userItem.embeddings || !potentialMatch.embeddings) {
           console.log('⚠️ Skipping item without embeddings');
@@ -465,16 +482,29 @@ router.post('/:id/claim', auth, async (req, res) => {
     // Create notification for the other user
     try {
       const Notification = require('../models/Notification');
-      await Notification.create({
-        studentId: matchedItem.studentId,
-        type: 'item_claimed',
-        title: 'Your item has been claimed!',
-        message: `Someone has claimed your ${matchedItem.type} item: ${matchedItem.category}. Please check your dashboard for details.`,
-        itemId: matchedItem._id,
-        matchedItemId: yourItemId,
-        read: false
-      });
-      console.log('✅ Notification created for student:', matchedItem.studentId);
+      
+      // Get the user who owns the matched item to get their userId
+      const matchedItemOwner = await User.findOne({ studentId: matchedItem.studentId });
+      
+      console.log('👤 Looking for user with studentId:', matchedItem.studentId);
+      console.log('👤 Found user:', matchedItemOwner ? 'Yes' : 'No');
+      
+      if (matchedItemOwner) {
+        console.log('👤 User _id:', matchedItemOwner._id);
+        await Notification.create({
+          userId: matchedItemOwner._id.toString(),
+          studentId: matchedItem.studentId,
+          type: 'item_claimed',
+          title: 'Your item has been claimed!',
+          message: `Someone has claimed your ${matchedItem.type} item: ${matchedItem.category}. Please check your dashboard for details.`,
+          itemId: matchedItem._id,
+          matchedItemId: yourItemId,
+          read: false
+        });
+        console.log('✅ Notification created for student:', matchedItem.studentId);
+      } else {
+        console.log('⚠️ User not found for studentId:', matchedItem.studentId);
+      }
     } catch (notifError) {
       console.error('⚠️ Failed to create notification:', notifError);
       // Don't fail the claim if notification fails
@@ -490,12 +520,31 @@ router.post('/:id/claim', auth, async (req, res) => {
   }
 });
 
-// Dismiss a match (optional - can be used to hide matches user doesn't want to see)
+// Dismiss a match (track dismissed matches so they don't show up again)
 router.post('/matches/:id/dismiss', auth, async (req, res) => {
   try {
-    // For now, just return success
-    // You could implement a dismissed matches tracking system here
-    console.log(`✅ Match ${req.params.id} dismissed by student ${req.user.studentId}`);
+    const { yourItemId } = req.body;
+    const dismissedItemId = req.params.id;
+    const studentId = req.user.studentId;
+    
+    const DismissedMatch = require('../models/DismissedMatch');
+    
+    // Save the dismissed match
+    await DismissedMatch.findOneAndUpdate(
+      {
+        studentId,
+        yourItemId,
+        dismissedItemId
+      },
+      {
+        studentId,
+        yourItemId,
+        dismissedItemId
+      },
+      { upsert: true, new: true }
+    );
+    
+    console.log(`✅ Match ${dismissedItemId} dismissed by student ${studentId}`);
     res.json({ success: true });
   } catch (error) {
     console.error('❌ Error dismissing match:', error);

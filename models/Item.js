@@ -20,7 +20,22 @@ const itemSchema = new mongoose.Schema({
     }
   }, // AI feature vector for matching
   matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }], // Potential matches
-  claimed: { type: Boolean, default: false } // Mark if item has been claimed/reunited
+  claimed: { type: Boolean, default: false }, // Mark if item has been claimed/reunited (legacy)
+  status: { 
+    type: String, 
+    enum: ['active', 'claimed', 'resolved'], 
+    default: 'active' 
+  }, // Current status of the item
+  matchedWith: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Item' 
+  }, // Reference to the matched item
+  claimedBy: { 
+    type: String 
+  }, // Student ID of who claimed it
+  claimedDate: { 
+    type: Date 
+  } // When it was claimed
 });
 
 module.exports = mongoose.model('Item', itemSchema);
