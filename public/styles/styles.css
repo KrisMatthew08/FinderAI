@@ -30,11 +30,52 @@ nav {
   z-index: 1000;
 }
 
+/* Hamburger menu (hidden on desktop) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: #f7efda;
+  margin: 3px 0;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Hide close button on desktop */
+.close-menu {
+  display: none !important;
+}
+
 nav ul{
     display: flex;
     justify-content: center;
     gap: 50px;
     list-style: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
 }
 
 nav ul li a{
@@ -106,7 +147,7 @@ nav ul li a:hover{
 
 .order-btn {
     padding: 12px 30px;
-    margin-top: 20px;
+    margin: 20px auto 0;
     font-family: "Bricolage Grotesque", sans-serif;
     font-size: 15px;
     font-weight: bold;
@@ -115,6 +156,7 @@ nav ul li a:hover{
     border: none;
     border-radius: 20px;
     cursor: pointer;
+    display: block;
 }
 
 .order-btn:hover {
@@ -343,5 +385,414 @@ nav ul li a:hover{
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Tablets and smaller laptops */
+@media (max-width: 1024px) {
+    nav {
+        width: 90%;
+        padding: 0.8rem;
+    }
+    
+    nav ul {
+        gap: 30px;
+    }
+    
+    nav ul li a {
+        font-size: 16px;
+    }
+    
+    .intro-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .forms-section .lostfile-section {
+        width: 85%;
+        padding: 40px 20px;
+    }
+}
+
+/* Mobile devices (portrait and landscape) */
+@media (max-width: 768px) {
+    /* Show Hamburger Menu */
+    .hamburger {
+        display: flex !important;
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .hamburger span {
+        width: 20px;
+        height: 2px;
+        margin: 2.5px 0;
+    }
+    
+    /* Navigation - Smaller Mobile Bar */
+    nav {
+        width: 88%;
+        top: 0.5rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 45px;
+        position: relative;
+        
+        /* FIX: Remove transform to fix positioning context */
+        transform: none;
+        left: 6%; /* (100% width - 88% width) / 2 */
+    }
+    
+    nav ul {
+        position: fixed;
+        left: -100%;
+        top: 0 !important;
+        bottom: 0;
+        flex-direction: column;
+        background-color: #733015 !important;
+        width: 70%;
+        max-width: 250px;
+        height: 100vh;
+        text-align: center;
+        transition: left 0.3s ease;
+        box-shadow: none;
+        padding: 60px 0 20px 0;
+        gap: 0;
+        justify-content: flex-start;
+        z-index: 9999;
+        overflow-y: auto;
+        display: flex !important;
+        margin: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        outline: none !important;
+    }
+    
+    nav ul.active {
+        left: 0 !important;
+    }
+    
+    nav ul li {
+        width: 100%;
+        border-bottom: 1px solid rgba(247, 239, 218, 0.15);
+        margin: 0;
+        padding: 0;
+    }
+    
+    nav ul li:last-child {
+        border-bottom: none;
+    }
+    
+    nav ul li a {
+        font-size: 14px;
+        padding: 14px 20px;
+        display: block;
+        transition: all 0.2s;
+        font-weight: 600;
+        width: 100%;
+        text-align: center;
+    }
+    
+    nav ul li a:hover,
+    nav ul li a:active {
+        background: rgba(247, 239, 218, 0.15);
+        color: #fff;
+    }
+    
+    /* Overlay when menu is open */
+    nav ul.active::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }
+    
+    /* Close button for mobile menu */
+    .close-menu {
+        display: none !important;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #f7efda;
+        font-size: 35px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        width: 35px;
+        height: 35px;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        z-index: 10000;
+    }
+    
+    nav ul.active .close-menu {
+        display: flex !important;
+    }
+    
+    .close-menu:hover {
+        transform: scale(1.1);
+        color: #fff;
+    }
+    
+    /* Intro Section */
+    .intro-section {
+        height: auto;
+        min-height: 100vh;
+        padding: 80px 20px 40px;
+    }
+    
+    .intro-content {
+        max-width: 100%;
+    }
+    
+    .intro-content h1 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        line-height: 1.3;
+    }
+    
+    .intro-content p {
+        font-size: 1rem;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    
+    .center-logo {
+        width: 120px;
+        margin: 20px 0;
+    }
+    
+    .socials {
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .socials i {
+        font-size: 30px !important;
+    }
+    
+    .order-btn {
+        padding: 12px 35px;
+        font-size: 15px;
+        margin: 25px auto 0;
+    }
+    
+    /* Tabs */
+    .tabs {
+        flex-direction: column;
+        gap: 15px;
+        margin: 20px 0 15px;
+    }
+    
+    .tab {
+        font-size: 16px;
+        padding: 10px;
+        border: 1px solid #733015;
+        border-radius: 8px;
+    }
+    
+    .tab.active {
+        background-color: #733015;
+        color: #f7efda;
+        border-bottom: none;
+    }
+    
+    /* Forms Section */
+    .forms-section {
+        padding: 40px 15px;
+    }
+    
+    .forms-section .lostfile-section {
+        width: 95%;
+        padding: 30px 15px;
+        gap: 18px;
+    }
+    
+    .forms-section h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
+    
+    .forms-section input[type="email"],
+    .forms-section input[type="text"],
+    .forms-section select,
+    .forms-section textarea {
+        width: 95%;
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .forms-section label {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: 95%;
+        text-align: center;
+    }
+    
+    .forms-section .submitbtn {
+        padding: 10px 25px;
+        font-size: 14px;
+        width: 95%;
+    }
+    
+    /* Lost & Found Section */
+    .lfsection {
+        padding: 30px 15px;
+    }
+    
+    .best-sellers h3 {
+        font-size: 22px;
+        margin-left: 15px;
+    }
+    
+    /* Popup */
+    .popup-content {
+        width: 90%;
+        max-width: 350px;
+        padding: 25px 20px;
+    }
+    
+    .popup-content p {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    
+    .popup-content button {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: 100%;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    nav {
+        width: 92%;
+        padding: 0.45rem 0.7rem;
+        border-radius: 12px;
+        min-height: 45px;
+    }
+    
+    .hamburger span {
+        width: 20px;
+        height: 2px;
+        margin: 2px 0;
+    }
+    
+    nav ul {
+        width: 80%;
+        max-width: none;
+        padding: 60px 12px 15px;
+    }
+    
+    nav ul li a {
+        font-size: 14px;
+        padding: 14px 10px;
+    }
+    
+    .intro-section {
+        padding: 70px 15px 35px;
+    }
+    
+    .intro-content h1 {
+        font-size: 1.5rem;
+        line-height: 1.2;
+    }
+    
+    .intro-content p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .center-logo {
+        width: 100px;
+        margin: 15px 0;
+    }
+    
+    .socials {
+        gap: 15px;
+    }
+    
+    .socials i {
+        font-size: 26px !important;
+    }
+    
+    .order-btn {
+        padding: 11px 30px;
+        font-size: 14px;
+    }
+    
+    .forms-section h2 {
+        font-size: 20px;
+    }
+    
+    .forms-section input[type="email"],
+    .forms-section input[type="text"],
+    .forms-section select,
+    .forms-section textarea {
+        font-size: 13px;
+        padding: 10px;
+    }
+    
+    .tab {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .intro-section {
+        height: auto;
+        padding: 80px 20px 30px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase tap targets for mobile */
+    nav ul li a,
+    .tab,
+    .order-btn,
+    .submitbtn,
+    .forms-section label {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Remove hover effects on touch devices */
+    nav ul li a:hover,
+    .tab:hover,
+    .order-btn:hover,
+    .submitbtn:hover {
+        transform: none;
+    }
+    
+    /* Active state for touch */
+    nav ul li a:active,
+    .tab:active,
+    .order-btn:active,
+    .submitbtn:active {
+        opacity: 0.8;
+        transform: scale(0.98);
     }
 }

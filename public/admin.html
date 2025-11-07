@@ -308,6 +308,253 @@
       padding: 40px;
       color: #999;
     }
+
+    /* ============================================
+       MOBILE RESPONSIVE STYLES
+       ============================================ */
+
+    /* Tablets */
+    @media (max-width: 1024px) {
+      body {
+        padding: 15px;
+      }
+
+      .admin-header h1 {
+        font-size: 1.6rem;
+      }
+
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 800px;
+      }
+    }
+
+    /* Mobile devices */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .admin-header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .admin-header h1 {
+        font-size: 1.4rem;
+      }
+
+      .admin-header p {
+        font-size: 0.9rem;
+      }
+
+      .user-info {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .logout-btn {
+        width: 100%;
+      }
+
+      /* Stats - Stack vertically on mobile */
+      .stats-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .stat-card {
+        padding: 15px;
+      }
+
+      .stat-card h2 {
+        font-size: 1.8rem;
+      }
+
+      /* Filter buttons */
+      .filter-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .filter-btn {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 120px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+
+      /* Table - Make scrollable */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 900px;
+        font-size: 0.85rem;
+      }
+
+      table th,
+      table td {
+        padding: 10px 8px;
+      }
+
+      .item-img {
+        width: 50px;
+        height: 50px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+
+      /* Modals */
+      .modal-content {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 20px;
+      }
+
+      .modal-content h2 {
+        font-size: 1.3rem;
+      }
+
+      .modal-body {
+        max-height: 60vh;
+      }
+
+      .form-group label {
+        font-size: 0.9rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 0.9rem;
+        padding: 10px;
+      }
+
+      .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .modal-footer button {
+        width: 100%;
+      }
+
+      /* Matches modal */
+      .match-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .match-item img {
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+
+      .match-info {
+        width: 100%;
+      }
+
+      .similarity-score {
+        position: static;
+        margin-top: 10px;
+      }
+    }
+
+    /* Small mobile devices */
+    @media (max-width: 480px) {
+      .admin-header h1 {
+        font-size: 1.2rem;
+      }
+
+      .admin-header h1 i {
+        font-size: 1rem;
+      }
+
+      .stat-card {
+        padding: 12px;
+      }
+
+      .stat-card h2 {
+        font-size: 1.5rem;
+      }
+
+      .stat-card p {
+        font-size: 0.8rem;
+      }
+
+      .filter-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        min-width: 100px;
+      }
+
+      table {
+        font-size: 0.75rem;
+      }
+
+      .btn {
+        padding: 5px 8px;
+        font-size: 0.7rem;
+      }
+
+      .modal-content {
+        padding: 15px;
+      }
+
+      .modal-content h2 {
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .btn,
+      .filter-btn,
+      .logout-btn {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn:active,
+      .filter-btn:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+      }
+
+      /* Remove hover effects on touch */
+      .btn:hover,
+      .filter-btn:hover,
+      .logout-btn:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>
