@@ -17,6 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/items', require('./routes/items'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Serve static files from the public directory
 app.use(express.static('public'));

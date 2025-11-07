@@ -31,6 +31,21 @@
         <li><a href="#about">ABOUT</a></li>
         <li><a href="#contact">CONTACT US</a></li>
         <li><a href="#help">HELP</a></li>
+        <li id="notificationWrapper" style="position: relative; display: none;">
+            <a href="#" id="notificationBell" style="position: relative;">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+            </a>
+            <div class="notification-dropdown" id="notificationDropdown">
+                <div class="notification-header">
+                    <h3>Notifications</h3>
+                    <button class="mark-all-read" id="markAllRead">Mark all read</button>
+                </div>
+                <div class="notification-list" id="notificationList">
+                    <p class="loading">Loading notifications...</p>
+                </div>
+            </div>
+        </li>
         <li id="adminLink" style="display: none;"><a href="admin.html" style="color: #ff6b6b;">ADMIN</a></li>
         <li id="authLink"><a href="login.html">LOGIN</a></li>
     </ul>
@@ -237,6 +252,20 @@
         foundItemContent.classList.remove('active');
     });
 
+    // Check sessionStorage for active tab (from dashboard navigation)
+    window.addEventListener('DOMContentLoaded', function() {
+        const activeTab = sessionStorage.getItem('activeTab');
+        if (activeTab === 'lost') {
+            // Trigger lost tab click
+            claimTab.click();
+            sessionStorage.removeItem('activeTab'); // Clear after use
+        } else if (activeTab === 'found') {
+            // Default is already found, but ensure it
+            lostTab.click();
+            sessionStorage.removeItem('activeTab'); // Clear after use
+        }
+    });
+
     // FIND NOW button scroll
     document.querySelector('.order-btn').addEventListener('click', function() {
         document.querySelector('.forms-section').scrollIntoView({ behavior: 'smooth' });
@@ -379,6 +408,9 @@
                     <a href="#" id="logoutBtn" style="color: #ff6b6b;">LOGOUT</a>
                 `;
                 
+                // Show notification bell
+                document.getElementById('notificationWrapper').style.display = 'block';
+                
                 // Show ADMIN button if user is admin
                 if (data.user.role === 'admin') {
                     adminLink.style.display = 'block';
@@ -399,6 +431,9 @@
         }
     });
 </script>
+
+<!-- Notification System -->
+<script src="scripts/notifications.js"></script>
 
 </body>
 </html>

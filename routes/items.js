@@ -302,4 +302,205 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
+// Get user's submitted items
+router.get('/my-items', auth, async (req, res) => {
+  try {
+    console.log('📋 Fetching items for student:', req.user.studentId);
+    
+    const items = await Item.find({ 
+      studentId: req.user.studentId 
+    }).sort({ createdAt: -1 });
+    
+    console.log(`✅ Found ${items.length} items for user`);
+    
+    // Convert images to base64 for frontend
+    const itemsWithBase64 = items.map(item => {
+      const itemObj = item.toObject();
+      if (itemObj.image && itemObj.image.buffer) {
+        itemObj.image = itemObj.image.buffer.toString('base64');
+      } else if (itemObj.image) {
+        itemObj.image = Buffer.from(itemObj.image).toString('base64');
+      }
+      return itemObj;
+    });
+    
+    res.json(itemsWithBase64);
+  } catch (err) {
+    console.error('❌ Error fetching user items:', err);
+    res.status(500).json({ message: 'Error fetching your items: ' + err.message });
+  }
+});
+
+// Get potential matches for user's items
+router.get('/my-matches', auth, async (req, res) => {
+  try {
+    const studentId = req.user.studentId;
+    
+    console.log('🔍 Finding matches for student:', studentId);
+    
+    // Get all user's submitted items
+    const userItems = await Item.find({ studentId });
+    
+    if (userItems.length === 0) {
+      return res.json({ matches: [] });
+    }
+    
+    const matches = [];
+    
+    // For each user's item, find potential matches
+    for (const userItem of userItems) {
+      // Skip if already claimed
+      if (userItem.status === 'claimed') continue;
+      
+      // Find items of opposite type (if user has lost, find found items and vice versa)
+      const oppositeType = userItem.type === 'lost' ? 'found' : 'lost';
+      
+      const potentialMatches = await Item.find({
+        type: oppositeType,
+        studentId: { $ne: studentId }, // Not the same user
+        status: { $ne: 'claimed' } // Not already claimed
+      });
+      
+      // Calculate similarity for each potential match
+      for (const potentialMatch of potentialMatches) {
+        // Check if both items have embeddings
+        if (!userItem.embeddings || !potentialMatch.embeddings) {
+          console.log('⚠️ Skipping item without embeddings');
+          continue;
+        }
+        
+        const similarity = cosineSimilarity(
+          userItem.embeddings,
+          potentialMatch.embeddings
+        ) * 100; // Convert to percentage
+        
+        // Only show matches above 60% similarity
+        if (similarity >= 60) {
+          // Convert images to base64 (match the format from /my-items route)
+          const userItemObj = userItem.toObject();
+          let userItemImageBase64 = null;
+          if (userItemObj.image && userItemObj.image.buffer) {
+            userItemImageBase64 = userItemObj.image.buffer.toString('base64');
+          } else if (userItemObj.image) {
+            userItemImageBase64 = Buffer.from(userItemObj.image).toString('base64');
+          }
+          
+          const matchedItemObj = potentialMatch.toObject();
+          let matchedItemImageBase64 = null;
+          if (matchedItemObj.image && matchedItemObj.image.buffer) {
+            matchedItemImageBase64 = matchedItemObj.image.buffer.toString('base64');
+          } else if (matchedItemObj.image) {
+            matchedItemImageBase64 = Buffer.from(matchedItemObj.image).toString('base64');
+          }
+          
+          matches.push({
+            yourItem: {
+              _id: userItem._id,
+              type: userItem.type,
+              category: userItem.category,
+              description: userItem.description,
+              imageBase64: userItemImageBase64
+            },
+            matchedItem: {
+              _id: potentialMatch._id,
+              type: potentialMatch.type,
+              category: potentialMatch.category,
+              description: potentialMatch.description,
+              location: potentialMatch.location,
+              dateReported: potentialMatch.dateReported || potentialMatch.createdAt,
+              imageBase64: matchedItemImageBase64
+            },
+            similarity: similarity
+          });
+        }
+      }
+    }
+    
+    // Sort by similarity (highest first)
+    matches.sort((a, b) => b.similarity - a.similarity);
+    
+    console.log(`✅ Found ${matches.length} potential matches for student ${studentId}`);
+    
+    res.json({ matches });
+    
+  } catch (error) {
+    console.error('❌ Error finding matches:', error);
+    res.status(500).json({ error: 'Failed to find matches' });
+  }
+});
+
+// Claim a matched item
+router.post('/:id/claim', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { yourItemId } = req.body;
+    const studentId = req.user.studentId;
+    
+    console.log(`📋 Claiming item ${id} for student ${studentId}`);
+    
+    const matchedItem = await Item.findById(id);
+    const yourItem = await Item.findById(yourItemId);
+    
+    if (!matchedItem || !yourItem) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    
+    // Verify that yourItem belongs to the user
+    if (yourItem.studentId !== studentId) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    // Update both items to claimed status
+    matchedItem.status = 'claimed';
+    matchedItem.claimedBy = studentId;
+    matchedItem.claimedDate = new Date();
+    matchedItem.matchedWith = yourItemId;
+    await matchedItem.save();
+    
+    yourItem.status = 'claimed';
+    yourItem.matchedWith = id;
+    yourItem.claimedDate = new Date();
+    await yourItem.save();
+    
+    // Create notification for the other user
+    try {
+      const Notification = require('../models/Notification');
+      await Notification.create({
+        studentId: matchedItem.studentId,
+        type: 'item_claimed',
+        title: 'Your item has been claimed!',
+        message: `Someone has claimed your ${matchedItem.type} item: ${matchedItem.category}. Please check your dashboard for details.`,
+        itemId: matchedItem._id,
+        matchedItemId: yourItemId,
+        read: false
+      });
+      console.log('✅ Notification created for student:', matchedItem.studentId);
+    } catch (notifError) {
+      console.error('⚠️ Failed to create notification:', notifError);
+      // Don't fail the claim if notification fails
+    }
+    
+    console.log(`✅ Item ${id} claimed successfully`);
+    
+    res.json({ success: true, message: 'Item claimed successfully' });
+    
+  } catch (error) {
+    console.error('❌ Error claiming item:', error);
+    res.status(500).json({ error: 'Failed to claim item' });
+  }
+});
+
+// Dismiss a match (optional - can be used to hide matches user doesn't want to see)
+router.post('/matches/:id/dismiss', auth, async (req, res) => {
+  try {
+    // For now, just return success
+    // You could implement a dismissed matches tracking system here
+    console.log(`✅ Match ${req.params.id} dismissed by student ${req.user.studentId}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('❌ Error dismissing match:', error);
+    res.status(500).json({ error: 'Failed to dismiss match' });
+  }
+});
+
 module.exports = router;

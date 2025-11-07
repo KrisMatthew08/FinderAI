@@ -19,11 +19,14 @@
       backdrop-filter: blur(15px);
       padding: 36px 30px;
       text-align: center;
-      width: 380px;
+      width: 90%;
+      max-width: 900px;
       color: #fff;
       box-shadow: 0 0 25px rgba(255, 255, 255, 0.08);
       transition: all 0.3s ease;
       z-index: 2;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .dashboard-wrapper h1 { font-size: 1.6rem; margin-bottom: 10px; }
     .dashboard-wrapper p.subtitle { font-size: 0.95rem; color: #f1f1f1; margin-bottom: 20px; line-height:1.4; }
@@ -38,7 +41,208 @@
     }
     .profile-info p { margin:6px 0; color:#fff; }
     .profile-info strong { color:#ffb400; }
-    .button-group { display:flex; flex-direction:column; gap:10px; }
+    
+    /* Submission History */
+    .history-section {
+      margin: 30px 0 20px;
+      text-align: left;
+    }
+    .history-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #ffb400;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+    .history-section h2:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .history-section h2 i.toggle-icon {
+      margin-left: auto;
+      transition: transform 0.3s ease;
+    }
+    .history-section h2.collapsed i.toggle-icon {
+      transform: rotate(-90deg);
+    }
+    .history-content {
+      max-height: 500px;
+      overflow-y: auto;
+      transition: max-height 0.3s ease;
+    }
+    .history-content.collapsed {
+      max-height: 0;
+      overflow: hidden;
+    }
+    .history-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    .history-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+    .history-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 180, 0, 0.5);
+      border-radius: 4px;
+    }
+    .history-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 180, 0, 0.7);
+    }
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .history-item {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.3s ease;
+    }
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-3px);
+    }
+    .history-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .history-item h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .history-item p {
+      font-size: 0.85rem;
+      color: #ddd;
+      margin: 4px 0;
+    }
+    .history-item .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .status.found { background: #4caf50; color: white; }
+    .status.lost { background: #f44336; color: white; }
+    .status.claimed { background: #ff9800; color: white; }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #bbb;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    
+    /* Potential Matches Styles */
+    .match-card {
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 180, 0, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 15px 0;
+      transition: all 0.3s ease;
+    }
+    .match-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 180, 0, 0.6);
+      box-shadow: 0 4px 12px rgba(255, 180, 0, 0.2);
+    }
+    .match-info {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .match-your-item,
+    .match-potential-item {
+      text-align: center;
+    }
+    .match-your-item h4,
+    .match-potential-item h4 {
+      margin: 0 0 10px 0;
+      color: #ffb400;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .match-image {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin: 10px auto;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: block;
+    }
+    .match-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .similarity-badge {
+      padding: 8px 15px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+    .match-location,
+    .match-date {
+      font-size: 0.85rem;
+      color: #ddd;
+      margin: 5px 0;
+    }
+    .match-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+    .claim-btn,
+    .not-match-btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    .claim-btn {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+    }
+    .claim-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+    .not-match-btn {
+      background: linear-gradient(135deg, #f44336, #da190b);
+      color: white;
+    }
+    .not-match-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    }
+    
+    .button-group { display:flex; flex-direction:column; gap:10px; margin-top: 20px; }
     .btn, .logout-btn {
       text-decoration:none;
       width:100%;
@@ -54,7 +258,29 @@
     .btn { background: linear-gradient(135deg,#d32f2f,#e53935); color:#fff; }
     .btn:hover { transform:translateY(-3px); }
     .logout-btn { background: linear-gradient(135deg,#b71c1c,#d32f2f); color:#fff; }
-    @media (max-width:480px){ .dashboard-wrapper { width:92%; padding:28px 18px } }
+    
+    @media (max-width:768px){ 
+      .dashboard-wrapper { width:95%; padding:28px 18px; max-height: 95vh; }
+      .history-grid { grid-template-columns: 1fr; }
+      .match-info {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      .match-arrow span {
+        transform: rotate(90deg);
+      }
+      .match-image {
+        width: 120px;
+        height: 120px;
+      }
+      .match-actions {
+        flex-direction: column;
+      }
+      .claim-btn,
+      .not-match-btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body class="home-bg">
@@ -74,10 +300,40 @@
       <p><strong>Student ID:</strong> <span id="userStudentId">—</span></p>
     </div>
 
+    <!-- Submission History Section -->
+    <div class="history-section">
+      <h2 id="historyToggle" onclick="toggleHistory()">
+        <i class="fas fa-history"></i> 
+        My Submission History
+        <i class="fas fa-chevron-down toggle-icon"></i>
+      </h2>
+      <div id="historyContent" class="history-content">
+        <div class="empty-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading your submissions...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Potential Matches Section -->
+    <div class="history-section">
+      <h2 id="matchesToggle" onclick="toggleMatches()">
+        <i class="fas fa-search"></i> 
+        Potential Matches for Your Items
+        <i class="fas fa-chevron-down toggle-icon"></i>
+      </h2>
+      <div id="matchesContent" class="history-content">
+        <div class="empty-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Searching for matches...</p>
+        </div>
+      </div>
+    </div>
+
     <div class="button-group" aria-label="Dashboard actions" id="dashboardButtons">
       <a href="index.html" class="btn" style="background: linear-gradient(135deg,#733015,#8b4513);"><i class="fa-solid fa-home"></i> Home</a>
-      <a href="index.html#forms-section" class="btn"><i class="fa-solid fa-magnifying-glass"></i> Report Found Item</a>
-      <a href="index.html#forms-section" class="btn"><i class="fa-solid fa-hand-holding-heart"></i> Report Lost Item</a>
+      <a href="index.html#forms-section" class="btn" onclick="sessionStorage.setItem('activeTab', 'found')"><i class="fa-solid fa-magnifying-glass"></i> Report Found Item</a>
+      <a href="index.html#forms-section" class="btn" onclick="sessionStorage.setItem('activeTab', 'lost')"><i class="fa-solid fa-hand-holding-heart"></i> Report Lost Item</a>
       <button onclick="logout()" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
     </div>
   </div>
@@ -88,7 +344,7 @@
 
   <script src="scripts/auth.js"></script>
   <script>
-    // Check authentication on page load
+    // Check authentication and load user data
     async function checkAuth() {
       const token = localStorage.getItem('token');
       
@@ -130,11 +386,99 @@
           buttonGroup.insertBefore(adminBtn, buttonGroup.lastElementChild);
         }
 
+        // Load submission history
+        await loadSubmissionHistory(token);
+
       } catch (error) {
         console.error('Auth error:', error);
         localStorage.removeItem('token');
         window.location.href = 'login.html';
       }
+    }
+
+    // Load user's submission history
+    async function loadSubmissionHistory(token) {
+      try {
+        console.log('🔄 Fetching submission history...');
+        const response = await fetch('/api/items/my-items', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('📡 Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Error response:', errorText);
+          throw new Error(`Failed to fetch items: ${response.status}`);
+        }
+
+        const items = await response.json();
+        console.log('✅ Received items:', items.length);
+        displaySubmissionHistory(items);
+
+      } catch (error) {
+        console.error('❌ Error loading history:', error);
+        document.getElementById('historyContent').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Failed to load submission history</p>
+            <p style="font-size: 0.85rem; color: #999; margin-top: 8px;">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Display submission history
+    function displaySubmissionHistory(items) {
+      const historyContent = document.getElementById('historyContent');
+      
+      if (!items || items.length === 0) {
+        historyContent.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No submissions yet</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Report a found or lost item to see it here!</p>
+          </div>
+        `;
+        return;
+      }
+
+      const historyGrid = document.createElement('div');
+      historyGrid.className = 'history-grid';
+
+      items.forEach(item => {
+        const itemCard = document.createElement('div');
+        itemCard.className = 'history-item';
+        
+        // Image is already base64 from backend
+        const imageUrl = item.image 
+          ? `data:${item.imageType || 'image/jpeg'};base64,${item.image}` 
+          : 'assets/placeholder.png';
+        
+        const statusClass = item.claimed ? 'claimed' : item.type.toLowerCase();
+        const statusText = item.claimed ? 'Claimed' : (item.type === 'found' ? 'Found' : 'Lost');
+        const date = new Date(item.createdAt).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+        });
+
+        itemCard.innerHTML = `
+          <img src="${imageUrl}" alt="${item.category}" onerror="this.src='assets/placeholder.png'">
+          <h3>${item.category}</h3>
+          <p><i class="fas fa-map-marker-alt"></i> ${item.location || 'Not specified'}</p>
+          <p><i class="fas fa-calendar"></i> ${date}</p>
+          <p style="font-size: 0.8rem; color: #ccc; margin-top: 5px;">${item.description || 'No description'}</p>
+          <span class="status ${statusClass}">${statusText}</span>
+        `;
+
+        historyGrid.appendChild(itemCard);
+      });
+
+      historyContent.innerHTML = '';
+      historyContent.appendChild(historyGrid);
     }
 
     function logout() {
@@ -147,8 +491,188 @@
       }, 1000);
     }
 
+    // Toggle submission history visibility
+    function toggleHistory() {
+      const historyContent = document.getElementById('historyContent');
+      const historyToggle = document.getElementById('historyToggle');
+      
+      historyContent.classList.toggle('collapsed');
+      historyToggle.classList.toggle('collapsed');
+    }
+
+    // Toggle matches visibility
+    function toggleMatches() {
+      const matchesContent = document.getElementById('matchesContent');
+      const matchesToggle = document.getElementById('matchesToggle');
+      
+      matchesContent.classList.toggle('collapsed');
+      matchesToggle.classList.toggle('collapsed');
+    }
+
+    // Load potential matches for user's items
+    async function loadPotentialMatches() {
+      const token = localStorage.getItem('token');
+      const matchesContent = document.getElementById('matchesContent');
+
+      try {
+        console.log('🔍 Searching for potential matches...');
+        const response = await fetch('/api/items/my-matches', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load matches');
+        }
+
+        const data = await response.json();
+        console.log('✅ Found matches:', data.matches?.length || 0);
+        displayPotentialMatches(data.matches);
+
+      } catch (error) {
+        console.error('❌ Error loading matches:', error);
+        matchesContent.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Failed to load potential matches</p>
+            <p style="font-size: 0.85rem; color: #999; margin-top: 8px;">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Display potential matches
+    function displayPotentialMatches(matches) {
+      const matchesContent = document.getElementById('matchesContent');
+      
+      if (!matches || matches.length === 0) {
+        matchesContent.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <p>No potential matches found yet</p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">We'll notify you when similar items are reported!</p>
+          </div>
+        `;
+        return;
+      }
+
+      matchesContent.innerHTML = matches.map(match => {
+        const similarityColor = 
+          match.similarity >= 80 ? '#4CAF50' : 
+          match.similarity >= 60 ? '#FF9800' : '#f44336';
+        
+        // Build image URLs with proper data URI format
+        const yourItemImage = match.yourItem.imageBase64 
+          ? `data:image/jpeg;base64,${match.yourItem.imageBase64}` 
+          : 'assets/placeholder.png';
+        
+        const matchedItemImage = match.matchedItem.imageBase64 
+          ? `data:image/jpeg;base64,${match.matchedItem.imageBase64}` 
+          : 'assets/placeholder.png';
+        
+        return `
+          <div class="match-card">
+            <div class="match-info">
+              <div class="match-your-item">
+                <h4>Your ${match.yourItem.type === 'found' ? 'Found' : 'Lost'} Item:</h4>
+                <img src="${yourItemImage}" alt="Your item" class="match-image" onerror="this.src='assets/placeholder.png'">
+                <p style="color: #fff; font-weight: bold; margin: 5px 0;">${match.yourItem.category}</p>
+                <p style="color: #ddd; font-size: 0.85rem;">${match.yourItem.description}</p>
+              </div>
+              <div class="match-arrow">
+                <span style="font-size: 30px; color: #ffb400;">⟷</span>
+                <div class="similarity-badge" style="background: ${similarityColor}">
+                  ${Math.round(match.similarity)}% Match
+                </div>
+              </div>
+              <div class="match-potential-item">
+                <h4>Potential Match:</h4>
+                <img src="${matchedItemImage}" alt="Matched item" class="match-image" onerror="this.src='assets/placeholder.png'">
+                <p style="color: #fff; font-weight: bold; margin: 5px 0;">${match.matchedItem.category}</p>
+                <p style="color: #ddd; font-size: 0.85rem;">${match.matchedItem.description}</p>
+                <p class="match-location">📍 ${match.matchedItem.location}</p>
+                <p class="match-date">📅 ${new Date(match.matchedItem.dateReported).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric', 
+                  year: 'numeric' 
+                })}</p>
+              </div>
+            </div>
+            <div class="match-actions">
+              <button class="claim-btn" onclick="claimMatch('${match.matchedItem._id}', '${match.yourItem._id}')">
+                ✅ This is My Item!
+              </button>
+              <button class="not-match-btn" onclick="dismissMatch('${match.matchedItem._id}', '${match.yourItem._id}')">
+                ❌ Not a Match
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Claim a matched item
+    async function claimMatch(matchedItemId, yourItemId) {
+      if (!confirm('Are you sure this is your item? This will notify the other person and mark both items as matched.')) {
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+
+      try {
+        const response = await fetch(`/api/items/${matchedItemId}/claim`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ yourItemId })
+        });
+
+        if (response.ok) {
+          showPopup('✅ Claim submitted! The other party has been notified.', 'success');
+          // Reload both sections
+          await loadPotentialMatches();
+          await loadSubmissionHistory(token);
+        } else {
+          const error = await response.json();
+          showPopup(`❌ Failed to claim item: ${error.error || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        console.error('❌ Error claiming item:', error);
+        showPopup('❌ Error claiming item. Please try again.', 'error');
+      }
+    }
+
+    // Dismiss a match
+    async function dismissMatch(matchedItemId, yourItemId) {
+      const token = localStorage.getItem('token');
+
+      try {
+        const response = await fetch(`/api/items/matches/${matchedItemId}/dismiss`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ yourItemId })
+        });
+
+        if (response.ok) {
+          console.log('✅ Match dismissed');
+          await loadPotentialMatches(); // Refresh matches
+        }
+      } catch (error) {
+        console.error('❌ Error dismissing match:', error);
+      }
+    }
+
     // Run auth check when page loads
-    checkAuth();
+    checkAuth().then(() => {
+      // Load potential matches after auth is verified
+      loadPotentialMatches();
+    });
   </script>
 </body>
 </html>
