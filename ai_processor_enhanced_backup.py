@@ -43,16 +43,51 @@ def extract_advanced_features(image_path):
         
         features = []
         
-        # ========== COLOR FEATURES (MINIMAL - 12 dimensions) ==========
-        print("🎨 Extracting minimal color features...", file=sys.stderr)
+        # ========== COLOR FEATURES (256 dimensions) ==========
+        print("🎨 Extracting color features...", file=sys.stderr)
         
-        # Only RGB mean per quadrant (12 dims: 4 quadrants × 3 channels)
-        # This reduces color's impact on matching
-        for i in range(2):
-            for j in range(2):
-                region = img_array[i*112:(i+1)*112, j*112:(j+1)*112, :]
-                for channel in range(3):
-                    features.append(float(region[:,:,channel].mean() / 255.0))
+        # 1. RGB Histograms (48 dims: 16 bins × 3 channels)
+        for channel in range(3):
+            hist, _ = np.histogram(img_array[:,:,channel], bins=16, range=(0, 256))
+            features.extend((hist / hist.sum()).tolist())
+        
+        # 2. HSV Histograms (48 dims: 16 bins × 3 channels)
+        img_hsv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2HSV)
+        for channel in range(3):
+            hist, _ = np.histogram(img_hsv[:,:,channel], bins=16, range=(0, 256))
+            features.extend((hist / hist.sum()).tolist())
+        
+        # 3. LAB Color Space (48 dims: 16 bins × 3 channels)
+        img_lab = cv2.cvtColor(img_cv, cv2.COLOR_BGR2LAB)
+        for channel in range(3):
+            hist, _ = np.histogram(img_lab[:,:,channel], bins=16, range=(0, 256))
+            features.extend((hist / hist.sum()).tolist())
+        
+        # 4. Spatial Color Grid (64 dims: 8×8 grid, average RGB)
+        grid_size = 8
+        h_step = 224 // grid_size
+        w_step = 224 // grid_size
+        for i in range(grid_size):
+            for j in range(grid_size):
+                region = img_array[i*h_step:(i+1)*h_step, j*w_step:(j+1)*w_step, :]
+                avg_color = region.mean(axis=(0, 1)) / 255.0
+                # Only take the mean across channels for spatial compactness
+                features.append(float(avg_color.mean()))
+        
+        # 5. Color Moments (48 dims: mean, std, skew for RGB in 4×4 grid)
+        grid_size = 4
+        h_step = 224 // grid_size
+        w_step = 224 // grid_size
+        for i in range(grid_size):
+            for j in range(grid_size):
+                region = img_array[i*h_step:(i+1)*h_step, j*w_step:(j+1)*w_step, :]
+                # Mean, std, skewness for each RGB channel (flatten to get more info)
+                features.append(float(region.mean() / 255.0))
+                features.append(float(region.std() / 255.0))
+                # Skewness approximation
+                centered = (region - region.mean()) / (region.std() + 1e-5)
+                skew = float((centered ** 3).mean())
+                features.append(skew)
         
         print(f"   ✅ Color features: {len(features)} dims", file=sys.stderr)
         
@@ -222,45 +257,6 @@ def extract_advanced_features(image_path):
                 features.extend((hist / (hist.sum() + 1e-5)).tolist())
         
         print(f"   ✅ Shape features: {len(features) - shape_start} dims", file=sys.stderr)
-        
-        # ========== OBJECT STRUCTURE FEATURES (using ORB keypoints) ==========
-        print("🔍 Extracting object structure features...", file=sys.stderr)
-        structure_start = len(features)
-        
-        # Initialize ORB detector
-        orb = cv2.ORB_create(nfeatures=100)
-        
-        # Detect keypoints and compute descriptors
-        keypoints, descriptors = orb.detectAndCompute(img_cv, None)
-        
-        if descriptors is not None and len(descriptors) > 0:
-            # Aggregate descriptors into a fixed-size feature vector
-            # Take mean and std of descriptors
-            desc_mean = np.mean(descriptors, axis=0)
-            desc_std = np.std(descriptors, axis=0)
-            
-            # Normalize
-            desc_mean = desc_mean / (np.linalg.norm(desc_mean) + 1e-5)
-            desc_std = desc_std / (np.linalg.norm(desc_std) + 1e-5)
-            
-            # Add spatial distribution of keypoints
-            kp_positions = np.array([kp.pt for kp in keypoints])
-            if len(kp_positions) > 0:
-                kp_x_hist, _ = np.histogram(kp_positions[:, 0], bins=8, range=(0, 224))
-                kp_y_hist, _ = np.histogram(kp_positions[:, 1], bins=8, range=(0, 224))
-                
-                kp_x_hist = kp_x_hist / (kp_x_hist.sum() + 1e-5)
-                kp_y_hist = kp_y_hist / (kp_y_hist.sum() + 1e-5)
-                
-                features.extend(kp_x_hist.tolist())
-                features.extend(kp_y_hist.tolist())
-            else:
-                features.extend([0.0] * 16)
-        else:
-            # No keypoints detected - object might be very smooth/uniform
-            features.extend([0.0] * 16)
-        
-        print(f"   ✅ Structure features: {len(features) - structure_start} dims", file=sys.stderr)
         
         # ========== FINAL PROCESSING ==========
         # Ensure exactly 768 dimensions

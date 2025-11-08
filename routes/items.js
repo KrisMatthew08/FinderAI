@@ -408,13 +408,49 @@ router.get('/my-matches', auth, async (req, res) => {
           continue;
         }
         
-        const similarity = cosineSimilarity(
+        // Calculate visual similarity from embeddings
+        let visualSimilarity = cosineSimilarity(
           userItem.embeddings,
           potentialMatch.embeddings
-        ) * 100; // Convert to percentage
+        ) * 100;
         
-        // Only show matches above 60% similarity
-        if (similarity >= 60) {
+        // Calculate category bonus (same category gets +15% boost)
+        const categoryBonus = userItem.category === potentialMatch.category ? 15 : 0;
+        
+        // Calculate date proximity bonus (items within 7 days get up to +10% boost)
+        let dateBonus = 0;
+        if (userItem.date && potentialMatch.date) {
+          const daysDiff = Math.abs(
+            (new Date(userItem.date) - new Date(potentialMatch.date)) / (1000 * 60 * 60 * 24)
+          );
+          if (daysDiff <= 7) {
+            dateBonus = 10 * (1 - daysDiff / 7); // Closer dates get higher bonus
+          }
+        }
+        
+        // Calculate description similarity bonus (up to +10% boost)
+        let descriptionBonus = 0;
+        if (userItem.description && potentialMatch.description) {
+          const desc1 = userItem.description.toLowerCase().split(/\s+/);
+          const desc2 = potentialMatch.description.toLowerCase().split(/\s+/);
+          const commonWords = desc1.filter(word => 
+            word.length > 3 && desc2.includes(word)
+          ).length;
+          const totalWords = Math.max(desc1.length, desc2.length);
+          if (totalWords > 0) {
+            descriptionBonus = (commonWords / totalWords) * 10;
+          }
+        }
+        
+        // Calculate final similarity score
+        const finalSimilarity = Math.min(100, visualSimilarity + categoryBonus + dateBonus + descriptionBonus);
+        
+        console.log(`🔍 Match Score: ${finalSimilarity.toFixed(1)}% (Visual: ${visualSimilarity.toFixed(1)}% + Category: ${categoryBonus.toFixed(1)}% + Date: ${dateBonus.toFixed(1)}% + Description: ${descriptionBonus.toFixed(1)}%)`);
+        console.log(`   Between item ${userItem._id} and ${potentialMatch._id}`);
+        
+        // Only show matches above 50% similarity
+        if (finalSimilarity >= 50) {
+          console.log(`✅ Match added: ${finalSimilarity.toFixed(1)}%`);
           // Convert images to base64 (match the format from /my-items route)
           const userItemObj = userItem.toObject();
           let userItemImageBase64 = null;
@@ -449,7 +485,7 @@ router.get('/my-matches', auth, async (req, res) => {
               dateReported: potentialMatch.dateReported || potentialMatch.createdAt,
               imageBase64: matchedItemImageBase64
             },
-            similarity: similarity
+            similarity: finalSimilarity
           });
         }
       }
