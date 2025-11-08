@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: finderai
+    env: node
+    buildCommand: |
+      npm install
+      pip install Pillow numpy scipy opencv-python
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: PYTHON_VERSION
+        value: 3.11

@@ -11,8 +11,16 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 const router = express.Router();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fsSync.existsSync(uploadsDir)) {
+  fsSync.mkdirSync(uploadsDir, { recursive: true });
+  console.log('📁 Created uploads directory:', uploadsDir);
+}
+
 const upload = multer({ 
-  dest: 'uploads/',
+  dest: uploadsDir,
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
@@ -57,7 +65,17 @@ router.post('/upload', auth, upload.single('image'), async (req, res) => {
     const enhancedScriptPath = path.join(__dirname, '..', 'ai_processor_enhanced.py');
     
     const embeddings = await new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python', [enhancedScriptPath, req.file.path]);
+      // Use python3 for Render.com compatibility, fallback to python for local
+      const pythonCmd = process.env.RENDER ? 'python3' : 'python';
+      // Use absolute path for the image file
+      const absoluteImagePath = path.resolve(req.file.path);
+      
+      console.log('🐍 Python command:', pythonCmd);
+      console.log('📄 Script path:', enhancedScriptPath);
+      console.log('🖼️  Image path:', absoluteImagePath);
+      console.log('🔍 Image exists:', fsSync.existsSync(absoluteImagePath));
+      
+      const pythonProcess = spawn(pythonCmd, [enhancedScriptPath, absoluteImagePath]);
       
       let stdoutData = '';
       let stderrData = '';
@@ -73,21 +91,25 @@ router.post('/upload', auth, upload.single('image'), async (req, res) => {
       });
       
       pythonProcess.on('close', (code) => {
+        console.log('📊 Python process closed with code:', code);
+        console.log('📊 Stdout data:', stdoutData);
+        console.log('📊 Stderr data:', stderrData);
+        
         if (code !== 0 || !stdoutData || stdoutData.trim().length === 0) {
-          reject(new Error(`Enhanced processor failed with code ${code}`));
+          reject(new Error(`Enhanced processor failed with code ${code}. Stderr: ${stderrData}`));
           return;
         }
         
         try {
           const result = JSON.parse(stdoutData.trim());
           if (result.error || !result.success || !result.embeddings) {
-            reject(new Error(`Enhanced processor returned error: ${result.error}`));
+            reject(new Error(`Enhanced processor returned error: ${result.error || 'Unknown error'}`));
             return;
           }
           console.log(`✅ Enhanced processor success: ${result.embeddings.length} dimensions`);
           resolve(result.embeddings);
         } catch (err) {
-          reject(new Error(`Enhanced processor parse error: ${err.message}`));
+          reject(new Error(`Enhanced processor parse error: ${err.message}. Raw output: ${stdoutData}`));
         }
       });
       
