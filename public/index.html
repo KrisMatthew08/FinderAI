@@ -83,7 +83,7 @@
     <section class="lostfile-section tab-content active" id="foundItemContent">
         <h2>Report a Found Item</h2>
         <form id="foundItemForm" enctype="multipart/form-data">
-            <input type="file" accept="image/*" id="foundImageInput" name="image" required>
+            <input type="file" accept="image/*" id="foundImageInput" name="image">
             <label for="foundImageInput">Upload Image of Found Item</label>
             <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
                 <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
@@ -119,7 +119,7 @@
     <section class="lostfile-section tab-content" id="lostItemContent">
         <h2>Report a Lost Item</h2>
         <form id="lostItemForm" enctype="multipart/form-data">
-            <input type="file" accept="image/*" id="lostImageInput" name="image" required>
+            <input type="file" accept="image/*" id="lostImageInput" name="image">
             <label for="lostImageInput">Upload Image of Lost Item</label>
             <div id="lostImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
                 <img id="lostPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
@@ -276,8 +276,43 @@
     const foundPopup = document.getElementById("foundPopup");
     const closeFoundPopupBtn = document.getElementById("closeFoundPopup");
 
+    // Add validation for found item form
+    const foundImageInput = document.getElementById('foundImageInput');
+    const foundCategorySelect = document.getElementById('foundCategorySelect');
+    const foundLocText = document.getElementById('foundLocText');
+    const foundDescText = document.getElementById('foundDescText');
+
+    foundCategorySelect.addEventListener('invalid', function(e) {
+        if (this.value === '') {
+            this.setCustomValidity('Please select a category');
+        }
+    });
+    foundCategorySelect.addEventListener('change', function() {
+        this.setCustomValidity('');
+    });
+
+    foundLocText.addEventListener('invalid', function(e) {
+        this.setCustomValidity('Please fill out the location where you found the item');
+    });
+    foundLocText.addEventListener('input', function() {
+        this.setCustomValidity('');
+    });
+
+    foundDescText.addEventListener('invalid', function(e) {
+        this.setCustomValidity('Please fill out a description of the item');
+    });
+    foundDescText.addEventListener('input', function() {
+        this.setCustomValidity('');
+    });
+
     foundForm.addEventListener("submit", async function(event) {
         event.preventDefault();
+        
+        // Validate image is selected
+        if (!foundImageInput.files || !foundImageInput.files[0]) {
+            alert('Please upload an image of the found item');
+            return;
+        }
         
         // Check if user is logged in
         const token = localStorage.getItem('token');
@@ -330,8 +365,43 @@
     const lostPopup = document.getElementById("lostPopup");
     const closeLostPopupBtn = document.getElementById("closeLostPopup");
 
+    // Add validation for lost item form
+    const lostImageInput = document.getElementById('lostImageInput');
+    const lostCategorySelect = document.getElementById('lostCategorySelect');
+    const lostLocText = document.getElementById('lostLocText');
+    const lostDescText = document.getElementById('lostDescText');
+
+    lostCategorySelect.addEventListener('invalid', function(e) {
+        if (this.value === '') {
+            this.setCustomValidity('Please select a category');
+        }
+    });
+    lostCategorySelect.addEventListener('change', function() {
+        this.setCustomValidity('');
+    });
+
+    lostLocText.addEventListener('invalid', function(e) {
+        this.setCustomValidity('Please fill out the location where you last saw the item');
+    });
+    lostLocText.addEventListener('input', function() {
+        this.setCustomValidity('');
+    });
+
+    lostDescText.addEventListener('invalid', function(e) {
+        this.setCustomValidity('Please fill out a description of the item');
+    });
+    lostDescText.addEventListener('input', function() {
+        this.setCustomValidity('');
+    });
+
     lostForm.addEventListener("submit", async function(event) {
         event.preventDefault();
+        
+        // Validate image is selected
+        if (!lostImageInput.files || !lostImageInput.files[0]) {
+            alert('Please upload an image of the lost item');
+            return;
+        }
         
         // Check if user is logged in
         const token = localStorage.getItem('token');
