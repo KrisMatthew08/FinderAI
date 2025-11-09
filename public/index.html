@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finder AI - Home</title>
-
-    <!--custom fonts-->
+    <title>FinderAI | Lost & Found System</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -13,502 +13,580 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     
-    <!-- External CSS -->
+    <!-- Main Styles -->
     <link rel="stylesheet" href="styles/styles.css">
-    <link rel="stylesheet" href="styles/lostitem.css">
-    <link rel="stylesheet" href="styles/claimitem.css">
+    
+    <style>
+        /* Notification Dropdown - White Theme */
+        .notification-wrapper {
+            position: relative;
+            display: none;
+        }
+
+        .notification-bell {
+            background: none;
+            border: none;
+            color: #f7efda;
+            font-size: 20px;
+            cursor: pointer;
+            position: relative;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            color: #ffb400;
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: -50px;
+            width: 320px !important;
+            max-height: 500px;
+            background: white !important;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            overflow: hidden;
+        }
+
+        .notification-dropdown.show {
+            display: block;
+        }
+
+        .notification-header {
+            background: white !important;
+            color: #733015 !important;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0 !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #733015 !important;
+        }
+
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: #733015 !important;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .mark-all-read:hover {
+            background: #f0f0f0 !important;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: white !important;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white !important;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            background: #f8f9fa !important;
+        }
+
+        .notification-item.unread {
+            background: white !important;
+        }
+
+        .notification-item button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            transition: all 0.2s;
+        }
+
+        .notification-item button:hover {
+            color: #ff4444;
+        }
+
+        .notification-content {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .notification-icon {
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-text strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #733015 !important;
+        }
+
+        .notification-text p {
+            font-size: 13px;
+            color: #666 !important;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #999 !important;
+            margin-top: 5px;
+        }
+
+        .notification-list .loading,
+        .notification-list .empty {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999 !important;
+            background: white !important;
+        }
+
+        .notification-list .loading i {
+            font-size: 24px;
+            color: #733015 !important;
+            margin-bottom: 10px;
+        }
+
+        /* Mobile notification positioning */
+        @media (max-width: 768px) {
+            .notification-dropdown {
+                position: fixed !important;
+                top: 60px !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+            }
+        }
+    </style>
 </head>
 <body>
-<nav>
-    <button class="hamburger" id="hamburger" aria-label="Menu">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    <ul id="navMenu">
-        <button class="close-menu" id="closeMenu" aria-label="Close Menu">×</button>
-        <li><a href="#home">HOME</a></li>
-        <li><a href="about.html">ABOUT</a></li>
-        <li><a href="contact.html">CONTACT US</a></li>
-        <li><a href="help.html">HELP</a></li>
-        <li id="notificationWrapper" style="position: relative; display: none;">
-            <a href="#" id="notificationBell" style="position: relative;">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
-            </a>
-            <div class="notification-dropdown" id="notificationDropdown">
-                <div class="notification-header">
-                    <h3>Notifications</h3>
-                    <button class="mark-all-read" id="markAllRead">Mark all read</button>
+    <!-- Navigation -->
+    <nav>
+        <ul>
+            <li><a href="index.html">HOME</a></li>
+            <li><a href="about.html">ABOUT</a></li>
+            <li><a href="contact.html">CONTACT</a></li>
+            <li><a href="help.html">HELP</a></li>
+            
+            <!-- Notification Bell (hidden by default, shown when logged in) -->
+            <li id="notificationWrapper" class="notification-wrapper" style="display: none;">
+                <button class="notification-bell" id="notificationBell" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                </button>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <div class="notification-header">
+                        <h3>Notifications</h3>
+                        <button class="mark-all-read" id="markAllRead">Mark all as read</button>
+                    </div>
+                    <div class="notification-list" id="notificationList">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading notifications...</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="notification-list" id="notificationList">
-                    <p class="loading">Loading notifications...</p>
-                </div>
+            </li>
+            
+            <li id="adminLink" style="display: none;"><a href="admin.html" style="color: #ff6b6b;">ADMIN</a></li>
+            <li id="authLink"><a href="login.html">LOGIN</a></li>
+        </ul>
+    </nav>
+
+    <!-- Intro Section -->
+    <section class="intro-section">
+        <div class="intro-content">
+            <h1>FINDER AI:<br>Lost objects, found hope</h1>
+            <p>Unite owners and their valuables with instant, accurate, and secure matching using the most advanced AI platform</p>
+            <img src="assets/mmcm_logo.png" alt="Mapua Logo" class="center-logo">
+            <div class="socials">
+                <a href="mailto:finderai@mcm.edu.ph" title="Email us"><i class="fa-solid fa-envelope"></i></a>
+                <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank" title="Find us on Map"><i class="fa-solid fa-location-dot"></i></a>
+                <a href="tel:+639123456789" title="Call us"><i class="fa-solid fa-phone"></i></a>
             </div>
-        </li>
-        <li id="adminLink" style="display: none;"><a href="admin.html" style="color: #ff6b6b;">ADMIN</a></li>
-        <li id="authLink"><a href="login.html">LOGIN</a></li>
-    </ul>
-</nav>
+            <button class="order-btn" onclick="document.getElementById('forms-section').scrollIntoView({behavior: 'smooth'})">FIND NOW</button>
+        </div>
+    </section>
 
-<section class="intro-section">
-  <div class="intro-content">
-    <h1>FINDER AI:<br>Lost objects, found hope</h1>
-    <p>
-      Unite owners and their valuables with instant, accurate, and secure matching using the most advanced AI platform
-    </p>
-
-    <img src="assets/mmcm_logo.png" alt="MMCM Logo" class="center-logo">
-
-    <div class="socials">
-      <a href="mailto:finderai@mcm.edu.ph"><i class="fa-solid fa-envelope" style="font-size: 35px; color: #733015;"></i></a>
-      <a href="https://www.facebook.com/mapuamcm" target="_blank"><i class="fa-brands fa-facebook" style="font-size: 35px; color: #733015;"></i></a>
-      <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank"><i class="fa-solid fa-location-dot" style="font-size: 35px; color: #733015;"></i></a>
-      <a href="tel:+639123456789"><i class="fa-solid fa-phone" style="font-size: 35px; color: #733015;"></i></a>
-    </div>
-
-    <button class="order-btn">FIND NOW</button>
-  </div>
-</section>
-
-<!-- Categories with Tab Content -->
-<section class="forms-section" id="forms-section">
-    <div class="lostnclaim-categories">
+    <!-- Forms Section -->
+    <section class="forms-section" id="forms-section">
         <div class="tabs">
             <span class="tab active" id="lostTab">Report Found Item</span>
             <span class="tab" id="claimTab">Report Lost Item</span>
         </div>
-    </div>
 
-    <!-- Found Item Form (Initially visible) -->
-    <section class="lostfile-section tab-content active" id="foundItemContent">
-        <h2>Report a Found Item</h2>
-        <form id="foundItemForm" enctype="multipart/form-data">
-            <input type="file" accept="image/*" id="foundImageInput" name="image">
-            <label for="foundImageInput">Upload Image of Found Item</label>
-            <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
-                <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
-            </div>
+        <!-- Found Item Form (Initially visible) -->
+        <section class="lostfile-section tab-content active" id="foundItemContent">
+            <h2>Report a Found Item</h2>
+            <form id="foundItemForm" enctype="multipart/form-data">
+                <input type="file" accept="image/*" id="foundImageInput" name="image">
+                <label for="foundImageInput">Upload Image of Found Item</label>
+                <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                    <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+                </div>
 
-            <label for="foundCategorySelect">Category:</label>
-            <select id="foundCategorySelect" name="category" required>
-                <option value="">Select Category</option>
-                <option value="Wallet">Wallet</option>
-                <option value="Phone">Phone</option>
-                <option value="Keys">Keys</option>
-                <option value="Bag">Bag</option>
-                <option value="ID">ID/Card</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Jewelry">Jewelry</option>
-                <option value="Other">Other</option>
-            </select>
+                <label for="foundCategorySelect">Category:</label>
+                <select id="foundCategorySelect" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Keys">Keys</option>
+                    <option value="Bag">Bag</option>
+                    <option value="ID">ID/Card</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Jewelry">Jewelry</option>
+                    <option value="Other">Other</option>
+                </select>
 
-            <label for="foundLocText">Location Found:</label>
-            <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
+                <label for="foundLocText">Location Found:</label>
+                <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
 
-            <label for="foundDateInput">Date Found:</label>
-            <input type="date" id="foundDateInput" name="dateFound" required>
+                <label for="foundDateInput">Date Found:</label>
+                <input type="date" id="foundDateInput" name="dateFound" required>
 
-            <label for="foundDescText">Description:</label>
-            <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
+                <label for="foundDescText">Description:</label>
+                <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
 
-            <button type="submit" class="submitbtn">Submit Found Item</button>
-        </form>
+                <button type="submit" class="submitbtn">Submit Found Item</button>
+            </form>
+        </section>
+
+        <!-- Lost Item Form (Initially hidden) -->
+        <section class="lostfile-section tab-content" id="lostItemContent">
+            <h2>Report a Lost Item</h2>
+            <form id="lostItemForm" enctype="multipart/form-data">
+                <input type="file" accept="image/*" id="lostImageInput" name="image">
+                <label for="lostImageInput">Upload Image of Lost Item</label>
+                <div id="lostImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                    <img id="lostPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+                </div>
+
+                <label for="lostCategorySelect">Category:</label>
+                <select id="lostCategorySelect" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Keys">Keys</option>
+                    <option value="Bag">Bag</option>
+                    <option value="ID">ID/Card</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Jewelry">Jewelry</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="lostLocText">Location Lost:</label>
+                <textarea id="lostLocText" name="location" rows="3" placeholder="e.g., Near Canteen, Parking Lot" required></textarea>
+
+                <label for="lostDateInput">Date Lost:</label>
+                <input type="date" id="lostDateInput" name="dateLost" required>
+
+                <label for="lostDescText">Description:</label>
+                <textarea id="lostDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
+
+                <button type="submit" class="submitbtn">Submit Lost Item</button>
+            </form>
+        </section>
     </section>
 
-    <!-- Lost Item Form (Initially hidden) -->
-    <section class="lostfile-section tab-content" id="lostItemContent">
-        <h2>Report a Lost Item</h2>
-        <form id="lostItemForm" enctype="multipart/form-data">
-            <input type="file" accept="image/*" id="lostImageInput" name="image">
-            <label for="lostImageInput">Upload Image of Lost Item</label>
-            <div id="lostImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
-                <img id="lostPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
-            </div>
-
-            <label for="lostCategorySelect">Category:</label>
-            <select id="lostCategorySelect" name="category" required>
-                <option value="">Select Category</option>
-                <option value="Wallet">Wallet</option>
-                <option value="Phone">Phone</option>
-                <option value="Keys">Keys</option>
-                <option value="Bag">Bag</option>
-                <option value="ID">ID/Card</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Jewelry">Jewelry</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <label for="lostLocText">Location Last Seen:</label>
-            <textarea id="lostLocText" name="location" rows="3" placeholder="e.g., Mapua Cafeteria, near entrance" required></textarea>
-
-            <label for="lostDateInput">Date Lost:</label>
-            <input type="date" id="lostDateInput" name="dateLost" required>
-
-            <label for="lostDescText">Description:</label>
-            <textarea id="lostDescText" name="description" rows="3" placeholder="Describe your lost item (color, brand, unique features, etc.)" required></textarea>
-
-            <button type="submit" class="submitbtn">Submit Lost Item</button>
-        </form>
-    </section>
-</section>
-
-<!-- Popup for Found Items -->
-<div id="foundPopup" class="popup">
-    <div class="popup-content">
-        <h3 style="color: #28a745; margin-bottom: 15px;">✓ Submit Success!</h3>
-        <p>Please surrender this to the Lost and Found Desk.</p>
-        <button id="closeFoundPopup">OK</button>
+    <!-- Success/Error Popups -->
+    <div id="foundSuccessPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h3>✅ Success!</h3>
+            <p>Your found item has been submitted successfully.</p>
+            <button id="closeFoundPopup">OK</button>
+        </div>
     </div>
-</div>
 
-<!-- Popup for Lost Items -->
-<div id="lostPopup" class="popup">
-    <div class="popup-content">
-        <h3 style="color: #28a745; margin-bottom: 15px;">✓ Submit Success!</h3>
-        <p>We'll send you a confirmation shortly.</p>
-        <button id="closeLostPopup">OK</button>
+    <div id="lostSuccessPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h3>✅ Success!</h3>
+            <p>Your lost item has been submitted successfully.</p>
+            <button id="closeLostPopup">OK</button>
+        </div>
     </div>
-</div>
 
-<script>
-    // Hamburger Menu Toggle
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('navMenu');
-    const closeMenu = document.getElementById('closeMenu');
-    
-    hamburger.addEventListener('click', function() {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
-    
-    // Close menu with X button
-    closeMenu.addEventListener('click', function() {
-        hamburger.classList.remove('active');
-        navMenu.classList.remove('active');
-    });
-    
-    // Close menu when clicking on a link
-    document.querySelectorAll('#navMenu a').forEach(link => {
-        link.addEventListener('click', function() {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
+    <!-- Loading Popup -->
+    <div id="loadingPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <div class="loading-spinner"></div>
+            <h3>Processing...</h3>
+            <p>Please wait while we process your submission.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p style="font-size: 1.1rem; margin-bottom: 10px;">© 2025 FinderAI - Mapúa Malayan Colleges Mindanao</p>
+        <p style="font-size: 0.9rem; opacity: 0.8;">Lost objects, found hope</p>
+        <div class="socials">
+            <a href="mailto:finderai@mcm.edu.ph" title="Email us"><i class="fa-solid fa-envelope"></i></a>
+            <a href="https://www.facebook.com/mapuamcm" target="_blank" title="Visit our Facebook"><i class="fa-brands fa-facebook"></i></a>
+            <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank" title="Find us on Map"><i class="fa-solid fa-location-dot"></i></a>
+            <a href="tel:+639123456789" title="Call us"><i class="fa-solid fa-phone"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching
+        const lostTab = document.getElementById('lostTab');
+        const claimTab = document.getElementById('claimTab');
+        const foundItemContent = document.getElementById('foundItemContent');
+        const lostItemContent = document.getElementById('lostItemContent');
+
+        lostTab.addEventListener('click', () => {
+            lostTab.classList.add('active');
+            claimTab.classList.remove('active');
+            foundItemContent.classList.add('active');
+            lostItemContent.classList.remove('active');
         });
-    });
-    
-    // Close menu when clicking outside
-    document.addEventListener('click', function(event) {
-        const isClickInside = navMenu.contains(event.target) || hamburger.contains(event.target);
-        if (!isClickInside && navMenu.classList.contains('active')) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        }
-    });
-    
-    // Image preview for Found Item
-    document.getElementById('foundImageInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('foundPreviewImg').src = event.target.result;
-                document.getElementById('foundImagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
 
-    // Image preview for Lost Item
-    document.getElementById('lostImageInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('lostPreviewImg').src = event.target.result;
-                document.getElementById('lostImagePreview').style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+        claimTab.addEventListener('click', () => {
+            claimTab.classList.add('active');
+            lostTab.classList.remove('active');
+            lostItemContent.classList.add('active');
+            foundItemContent.classList.remove('active');
+        });
 
-    // Tab switching functionality
-    const lostTab = document.getElementById('lostTab');
-    const claimTab = document.getElementById('claimTab');
-    const foundItemContent = document.getElementById('foundItemContent');
-    const lostItemContent = document.getElementById('lostItemContent');
-
-    lostTab.addEventListener('click', function() {
-        // Switch to Found Item tab
-        lostTab.classList.add('active');
-        claimTab.classList.remove('active');
-        foundItemContent.classList.add('active');
-        lostItemContent.classList.remove('active');
-    });
-
-    claimTab.addEventListener('click', function() {
-        // Switch to Lost Item tab
-        claimTab.classList.add('active');
-        lostTab.classList.remove('active');
-        lostItemContent.classList.add('active');
-        foundItemContent.classList.remove('active');
-    });
-
-    // Check sessionStorage for active tab (from dashboard navigation)
-    window.addEventListener('DOMContentLoaded', function() {
-        const activeTab = sessionStorage.getItem('activeTab');
-        if (activeTab === 'lost') {
-            // Trigger lost tab click
-            claimTab.click();
-            sessionStorage.removeItem('activeTab'); // Clear after use
-        } else if (activeTab === 'found') {
-            // Default is already found, but ensure it
-            lostTab.click();
-            sessionStorage.removeItem('activeTab'); // Clear after use
-        }
-    });
-
-    // FIND NOW button scroll
-    document.querySelector('.order-btn').addEventListener('click', function() {
-        document.querySelector('.forms-section').scrollIntoView({ behavior: 'smooth' });
-    });
-
-    // Found Item Form Submission
-    const foundForm = document.getElementById("foundItemForm");
-    const foundPopup = document.getElementById("foundPopup");
-    const closeFoundPopupBtn = document.getElementById("closeFoundPopup");
-
-    // Add validation for found item form
-    const foundImageInput = document.getElementById('foundImageInput');
-    const foundCategorySelect = document.getElementById('foundCategorySelect');
-    const foundLocText = document.getElementById('foundLocText');
-    const foundDescText = document.getElementById('foundDescText');
-
-    foundCategorySelect.addEventListener('invalid', function(e) {
-        if (this.value === '') {
-            this.setCustomValidity('Please select a category');
-        }
-    });
-    foundCategorySelect.addEventListener('change', function() {
-        this.setCustomValidity('');
-    });
-
-    foundLocText.addEventListener('invalid', function(e) {
-        this.setCustomValidity('Please fill out the location where you found the item');
-    });
-    foundLocText.addEventListener('input', function() {
-        this.setCustomValidity('');
-    });
-
-    foundDescText.addEventListener('invalid', function(e) {
-        this.setCustomValidity('Please fill out a description of the item');
-    });
-    foundDescText.addEventListener('input', function() {
-        this.setCustomValidity('');
-    });
-
-    foundForm.addEventListener("submit", async function(event) {
-        event.preventDefault();
-        
-        // Validate image is selected
-        if (!foundImageInput.files || !foundImageInput.files[0]) {
-            alert('Please upload an image of the found item');
-            return;
-        }
-        
-        // Check if user is logged in
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Please login to report an item');
-            window.location.href = 'login.html';
-            return;
-        }
-        
-        const formData = new FormData();
-        formData.append('type', 'found');
-        formData.append('category', document.getElementById('foundCategorySelect').value);
-        formData.append('location', document.getElementById('foundLocText').value);
-        formData.append('description', document.getElementById('foundDescText').value);
-        formData.append('dateFound', document.getElementById('foundDateInput').value);
-        formData.append('image', document.getElementById('foundImageInput').files[0]);
-        
-        try {
-            const response = await fetch('/api/items/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                foundPopup.style.display = "flex";
-            } else {
-                alert('Error: ' + data.message);
+        // Image previews - Found Item
+        document.getElementById('foundImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('foundPreviewImg').src = event.target.result;
+                    document.getElementById('foundImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
-        } catch (error) {
-            alert('Error submitting form: ' + error.message);
-        }
-    });
+        });
 
-    closeFoundPopupBtn.addEventListener("click", function() {
-        foundPopup.style.display = "none";
-        foundForm.reset();
-        // Clear image preview
-        document.getElementById('foundImagePreview').style.display = 'none';
-        document.getElementById('foundPreviewImg').src = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // Lost Item Form Submission
-    const lostForm = document.getElementById("lostItemForm");
-    const lostPopup = document.getElementById("lostPopup");
-    const closeLostPopupBtn = document.getElementById("closeLostPopup");
-
-    // Add validation for lost item form
-    const lostImageInput = document.getElementById('lostImageInput');
-    const lostCategorySelect = document.getElementById('lostCategorySelect');
-    const lostLocText = document.getElementById('lostLocText');
-    const lostDescText = document.getElementById('lostDescText');
-
-    lostCategorySelect.addEventListener('invalid', function(e) {
-        if (this.value === '') {
-            this.setCustomValidity('Please select a category');
-        }
-    });
-    lostCategorySelect.addEventListener('change', function() {
-        this.setCustomValidity('');
-    });
-
-    lostLocText.addEventListener('invalid', function(e) {
-        this.setCustomValidity('Please fill out the location where you last saw the item');
-    });
-    lostLocText.addEventListener('input', function() {
-        this.setCustomValidity('');
-    });
-
-    lostDescText.addEventListener('invalid', function(e) {
-        this.setCustomValidity('Please fill out a description of the item');
-    });
-    lostDescText.addEventListener('input', function() {
-        this.setCustomValidity('');
-    });
-
-    lostForm.addEventListener("submit", async function(event) {
-        event.preventDefault();
-        
-        // Validate image is selected
-        if (!lostImageInput.files || !lostImageInput.files[0]) {
-            alert('Please upload an image of the lost item');
-            return;
-        }
-        
-        // Check if user is logged in
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('Please login to report an item');
-            window.location.href = 'login.html';
-            return;
-        }
-        
-        const formData = new FormData();
-        formData.append('type', 'lost');
-        formData.append('category', document.getElementById('lostCategorySelect').value);
-        formData.append('location', document.getElementById('lostLocText').value);
-        formData.append('description', document.getElementById('lostDescText').value);
-        formData.append('dateLost', document.getElementById('lostDateInput').value);
-        formData.append('image', document.getElementById('lostImageInput').files[0]);
-        
-        try {
-            const response = await fetch('/api/items/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                lostPopup.style.display = "flex";
-            } else {
-                alert('Error: ' + data.message);
+        // Image previews - Lost Item
+        document.getElementById('lostImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('lostPreviewImg').src = event.target.result;
+                    document.getElementById('lostImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
             }
-        } catch (error) {
-            alert('Error submitting form: ' + error.message);
-        }
-    });
+        });
 
-    closeLostPopupBtn.addEventListener("click", function() {
-        lostPopup.style.display = "none";
-        lostForm.reset();
-        // Clear image preview
-        document.getElementById('lostImagePreview').style.display = 'none';
-        document.getElementById('lostPreviewImg').src = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // Check if user is logged in on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('token');
-        const authLink = document.getElementById('authLink');
-        const adminLink = document.getElementById('adminLink');
-        
-        if (token && authLink) {
-            // User is logged in, verify token
-            fetch('/api/auth/verify', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(res => {
-                if (!res.ok) {
-                    // Token is invalid, remove it
-                    localStorage.removeItem('token');
-                    throw new Error('Invalid token');
-                }
-                return res.json();
-            })
-            .then(data => {
-                // Replace LOGIN with DASHBOARD and LOGOUT
-                authLink.innerHTML = `
-                    <a href="dashboard.html">DASHBOARD</a>
-                    <span style="color: #f7efda; margin: 0 10px;">|</span>
-                    <a href="#" id="logoutBtn" style="color: #ff6b6b;">LOGOUT</a>
-                `;
-                
-                // Show notification bell
-                document.getElementById('notificationWrapper').style.display = 'block';
-                
-                // Show ADMIN button if user is admin
-                if (data.user.role === 'admin') {
-                    adminLink.style.display = 'block';
-                }
-                
-                // Handle logout
-                document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('userName');
-                    localStorage.removeItem('userEmail');
-                    window.location.reload();
+        // Form submission - Found Item
+        document.getElementById('foundItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const imageFile = document.getElementById('foundImageInput').files[0];
+            
+            if (!imageFile) {
+                alert('Please select an image of the item');
+                return;
+            }
+            
+            formData.append('image', imageFile);
+            formData.append('type', 'found');
+            formData.append('category', document.getElementById('foundCategorySelect').value);
+            formData.append('location', document.getElementById('foundLocText').value);
+            formData.append('dateFound', document.getElementById('foundDateInput').value);
+            formData.append('description', document.getElementById('foundDescText').value);
+            
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                alert('Please login to submit items');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Show loading popup
+            document.getElementById('loadingPopup').style.display = 'flex';
+            
+            try {
+                const response = await fetch('/api/items/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
-            })
-            .catch(err => {
-                console.error('Auth verification failed:', err);
-            });
-        }
-    });
-</script>
+                
+                // Hide loading popup
+                document.getElementById('loadingPopup').style.display = 'none';
+                
+                if (response.ok) {
+                    document.getElementById('foundSuccessPopup').style.display = 'flex';
+                    document.getElementById('foundItemForm').reset();
+                    document.getElementById('foundImagePreview').style.display = 'none';
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || error.error || 'Failed to submit found item'));
+                }
+            } catch (err) {
+                // Hide loading popup on error
+                document.getElementById('loadingPopup').style.display = 'none';
+                console.error('Submission error:', err);
+                alert('Error: Failed to submit. Please try again.');
+            }
+        });
 
-<!-- Notification System -->
-<script src="scripts/notifications.js"></script>
+        // Form submission - Lost Item
+        document.getElementById('lostItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const imageFile = document.getElementById('lostImageInput').files[0];
+            
+            if (!imageFile) {
+                alert('Please select an image of the item');
+                return;
+            }
+            
+            formData.append('image', imageFile);
+            formData.append('type', 'lost');
+            formData.append('category', document.getElementById('lostCategorySelect').value);
+            formData.append('location', document.getElementById('lostLocText').value);
+            formData.append('dateLost', document.getElementById('lostDateInput').value);
+            formData.append('description', document.getElementById('lostDescText').value);
+            
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                alert('Please login to submit items');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Show loading popup
+            document.getElementById('loadingPopup').style.display = 'flex';
+            
+            try {
+                const response = await fetch('/api/items/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                // Hide loading popup
+                document.getElementById('loadingPopup').style.display = 'none';
+                
+                if (response.ok) {
+                    document.getElementById('lostSuccessPopup').style.display = 'flex';
+                    document.getElementById('lostItemForm').reset();
+                    document.getElementById('lostImagePreview').style.display = 'none';
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || error.error || 'Failed to submit lost item'));
+                }
+            } catch (err) {
+                // Hide loading popup on error
+                document.getElementById('loadingPopup').style.display = 'none';
+                console.error('Submission error:', err);
+                alert('Error: Failed to submit. Please try again.');
+            }
+        });
 
+        // Popup close buttons
+        document.getElementById('closeFoundPopup').addEventListener('click', function() {
+            document.getElementById('foundSuccessPopup').style.display = 'none';
+        });
+
+        document.getElementById('closeLostPopup').addEventListener('click', function() {
+            document.getElementById('lostSuccessPopup').style.display = 'none';
+        });
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const authLink = document.getElementById('authLink');
+            const adminLink = document.getElementById('adminLink');
+            if (token) {
+                fetch('/api/auth/verify', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        localStorage.removeItem('token');
+                        throw new Error('Invalid token');
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    authLink.innerHTML = `
+                        <a href="dashboard.html">DASHBOARD</a>
+                        <span style="color: #f7efda; margin: 0 10px;">|</span>
+                        <a href="#" id="logoutBtn" style="color: #ff6b6b;">LOGOUT</a>
+                    `;
+                    document.getElementById('notificationWrapper').style.display = 'block';
+                    if (data.user.role === 'admin') {
+                        adminLink.style.display = 'block';
+                    }
+                    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userName');
+                        localStorage.removeItem('userEmail');
+                        window.location.reload();
+                    });
+                })
+                .catch(err => console.error('Auth verification failed:', err));
+            }
+        });
+    </script>
+    
+    <!-- Notification System -->
+    <script src="scripts/notifications.js"></script>
 </body>
 </html>
-
-
-
-

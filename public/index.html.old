@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinderAI - Home</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Bricolage Grotesque", sans-serif;
+            background: white;
+            min-height: 100vh;
+            color: #733015;
+        }
+
+        /* Navigation */
+        nav {
+            background: #733015;
+            padding: 20px 50px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            color: #f7efda;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #ffb400;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #733015;
+            line-height: 1.3;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #733015;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .center-logo {
+            width: 180px;
+            margin: 20px 0;
+        }
+
+        .socials {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .socials a i {
+            font-size: 35px;
+            color: #733015;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .socials a:hover i {
+            color: #ffb400;
+            transform: scale(1.2);
+        }
+
+        .find-btn {
+            padding: 15px 40px;
+            background: #733015;
+            color: #f7efda;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 4px 15px rgba(115, 48, 21, 0.2);
+        }
+
+        .find-btn:hover {
+            background: #8b4020;
+            transform: scale(1.05);
+        }
+
+        /* Forms Section */
+        .forms-section {
+            background: white;
+            padding: 60px 20px;
+            min-height: 100vh;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0 20px;
+        }
+
+        .tab {
+            font-weight: bold;
+            cursor: pointer;
+            color: #733015;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+        }
+
+        .tab:hover {
+            color: #ffb400;
+            font-size: 19px;
+            border-bottom: 2px solid #ffb400;
+            transform: scale(1.05);
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #733015;
+        }
+
+        .tab.active:hover {
+            border-bottom: 2px solid #ffb400;
+        }
+
+        .tab-content {
+            display: none !important;
+            opacity: 0;
+        }
+
+        .tab-content.active {
+            display: flex !important;
+            opacity: 1;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .lostfile-section {
+            background-color: white;
+            margin: 40px auto;
+            width: 70%;
+            max-width: 800px;
+            border-radius: 20px;
+            padding: 60px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(115, 48, 21, 0.1);
+            border: 2px solid #733015;
+        }
+
+        .lostfile-section h2 {
+            color: #733015;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .lostfile-section form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .lostfile-section label {
+            background-color: #733015;
+            color: #f7efda;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .lostfile-section label:hover {
+            background: #8b4020;
+            transform: scale(1.05);
+        }
+
+        .lostfile-section input[type="file"] {
+            display: none;
+        }
+
+        .lostfile-section input[type="text"],
+        .lostfile-section input[type="date"],
+        .lostfile-section select,
+        .lostfile-section textarea {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            border: 2px solid #733015;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: "Bricolage Grotesque", sans-serif;
+        }
+
+        .submitbtn {
+            background: #733015;
+            color: #f7efda;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .submitbtn:hover {
+            background: #8b4020;
+            transform: scale(1.05);
+        }
+
+        /* Footer */
+        footer {
+            background: #733015;
+            color: #f7efda;
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer .socials {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        footer .socials a {
+            color: #f7efda;
+            font-size: 28px;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        footer .socials a:hover {
+            color: #ffb400;
+            transform: scale(1.2);
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+
+            nav {
+                padding: 15px 20px;
+            }
+
+            nav ul {
+                gap: 20px;
+            }
+
+            .lostfile-section {
+                width: 90%;
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="home.html">HOME</a></li>
+            <li><a href="about.html">ABOUT</a></li>
+            <li><a href="contact.html">CONTACT US</a></li>
+            <li><a href="help.html">HELP</a></li>
+            <li id="notificationWrapper" style="position: relative; display: none;">
+                <a href="#" id="notificationBell" style="position: relative;">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                </a>
+            </li>
+            <li id="adminLink" style="display: none;"><a href="admin.html" style="color: #ff6b6b;">ADMIN</a></li>
+            <li id="authLink"><a href="login.html">LOGIN</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero-section">
+        <h1>FINDER AI:<br>Lost objects, found hope</h1>
+        <p>
+            Unite owners and their valuables with instant, accurate, and secure matching using the most advanced AI platform
+        </p>
+
+        <img src="assets/mmcm_logo.png" alt="MMCM Logo" class="center-logo">
+
+        <div class="socials">
+            <a href="mailto:finderai@mcm.edu.ph"><i class="fa-solid fa-envelope"></i></a>
+            <a href="https://www.facebook.com/mapuamcm" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+            <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank"><i class="fa-solid fa-location-dot"></i></a>
+            <a href="tel:+639123456789"><i class="fa-solid fa-phone"></i></a>
+        </div>
+
+        <button class="find-btn" onclick="document.getElementById('forms-section').scrollIntoView({behavior: 'smooth'})">FIND NOW</button>
+    </section>
+
+    <!-- Categories with Tab Content -->
+    <section class="forms-section" id="forms-section">
+        <div class="tabs">
+            <span class="tab active" id="lostTab">Report Found Item</span>
+            <span class="tab" id="claimTab">Report Lost Item</span>
+        </div>
+
+        <!-- Found Item Form (Initially visible) -->
+        <section class="lostfile-section tab-content active" id="foundItemContent">
+            <h2>Report a Found Item</h2>
+            <form id="foundItemForm" enctype="multipart/form-data">
+                <input type="file" accept="image/*" id="foundImageInput" name="image">
+                <label for="foundImageInput">Upload Image of Found Item</label>
+                <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                    <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+                </div>
+
+                <label for="foundCategorySelect">Category:</label>
+                <select id="foundCategorySelect" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Keys">Keys</option>
+                    <option value="Bag">Bag</option>
+                    <option value="ID">ID/Card</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Jewelry">Jewelry</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="foundLocText">Location Found:</label>
+                <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
+
+                <label for="foundDateInput">Date Found:</label>
+                <input type="date" id="foundDateInput" name="dateFound" required>
+
+                <label for="foundDescText">Description:</label>
+                <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
+
+                <button type="submit" class="submitbtn">Submit Found Item</button>
+            </form>
+        </section>
+
+        <!-- Lost Item Form (Initially hidden) -->
+        <section class="lostfile-section tab-content" id="lostItemContent">
+            <h2>Report a Lost Item</h2>
+            <form id="lostItemForm" enctype="multipart/form-data">
+                <input type="file" accept="image/*" id="lostImageInput" name="image">
+                <label for="lostImageInput">Upload Image of Lost Item</label>
+                <div id="lostImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                    <img id="lostPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+                </div>
+
+                <label for="lostCategorySelect">Category:</label>
+                <select id="lostCategorySelect" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Keys">Keys</option>
+                    <option value="Bag">Bag</option>
+                    <option value="ID">ID/Card</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Jewelry">Jewelry</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="lostLocText">Location Lost:</label>
+                <textarea id="lostLocText" name="location" rows="3" placeholder="e.g., Near Canteen, Parking Lot" required></textarea>
+
+                <label for="lostDateInput">Date Lost:</label>
+                <input type="date" id="lostDateInput" name="dateLost" required>
+
+                <label for="lostDescText">Description:</label>
+                <textarea id="lostDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
+
+                <button type="submit" class="submitbtn">Submit Lost Item</button>
+            </form>
+        </section>
+    </section>
+
+    <!-- Success/Error Popups -->
+    <div id="foundSuccessPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h3>✅ Success!</h3>
+            <p>Your found item has been submitted successfully.</p>
+            <button id="closeFoundPopup">OK</button>
+        </div>
+    </div>
+
+    <div id="lostSuccessPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <h3>✅ Success!</h3>
+            <p>Your lost item has been submitted successfully.</p>
+            <button id="closeLostPopup">OK</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p style="font-size: 1.1rem; margin-bottom: 10px;">© 2025 FinderAI - Mapúa Malayan Colleges Mindanao</p>
+        <p style="font-size: 0.9rem; opacity: 0.8;">Lost objects, found hope</p>
+        <div class="socials">
+            <a href="mailto:finderai@mcm.edu.ph" title="Email us"><i class="fa-solid fa-envelope"></i></a>
+            <a href="https://www.facebook.com/mapuamcm" target="_blank" title="Visit our Facebook"><i class="fa-brands fa-facebook"></i></a>
+            <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank" title="Find us on Map"><i class="fa-solid fa-location-dot"></i></a>
+            <a href="tel:+639123456789" title="Call us"><i class="fa-solid fa-phone"></i></a>
+        </div>
+    </footer>
+
+    <script src="scripts/forms.js"></script>
+    <script src="scripts/notifications.js"></script>
+    <script>
+        // Tab switching
+        const lostTab = document.getElementById('lostTab');
+        const claimTab = document.getElementById('claimTab');
+        const foundItemContent = document.getElementById('foundItemContent');
+        const lostItemContent = document.getElementById('lostItemContent');
+
+        lostTab.addEventListener('click', () => {
+            lostTab.classList.add('active');
+            claimTab.classList.remove('active');
+            foundItemContent.classList.add('active');
+            lostItemContent.classList.remove('active');
+        });
+
+        claimTab.addEventListener('click', () => {
+            claimTab.classList.add('active');
+            lostTab.classList.remove('active');
+            lostItemContent.classList.add('active');
+            foundItemContent.classList.remove('active');
+        });
+
+        // Image previews
+        document.getElementById('foundImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('foundPreviewImg').src = event.target.result;
+                    document.getElementById('foundImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('lostImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('lostPreviewImg').src = event.target.result;
+                    document.getElementById('lostImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const authLink = document.getElementById('authLink');
+            const adminLink = document.getElementById('adminLink');
+            
+            if (token) {
+                fetch('/api/auth/verify', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        localStorage.removeItem('token');
+                        throw new Error('Invalid token');
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    authLink.innerHTML = `
+                        <a href="dashboard.html">DASHBOARD</a>
+                        <span style="color: #f7efda; margin: 0 10px;">|</span>
+                        <a href="#" id="logoutBtn" style="color: #ff6b6b;">LOGOUT</a>
+                    `;
+                    
+                    document.getElementById('notificationWrapper').style.display = 'block';
+                    
+                    if (data.user.role === 'admin') {
+                        adminLink.style.display = 'block';
+                    }
+                    
+                    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('userName');
+                        localStorage.removeItem('userEmail');
+                        window.location.reload();
+                    });
+                })
+                .catch(err => {
+                    console.error('Auth verification failed:', err);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
