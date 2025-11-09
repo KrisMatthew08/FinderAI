@@ -660,6 +660,21 @@
     </div>
   </div>
 
+  <!-- Accounts Section -->
+  <div class="items-container" style="margin-top: 30px;">
+    <div class="items-header">
+      <h2><i class="fa-solid fa-users"></i> Registered Accounts</h2>
+      <div class="stat-card" style="padding: 10px 20px;">
+        <h3 id="totalAccounts">0</h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+
+    <div id="accountsTableContainer">
+      <div class="loading">Loading accounts...</div>
+    </div>
+  </div>
+
   <!-- Edit Modal -->
   <div id="editModal" class="modal">
     <div class="modal-content">
@@ -751,6 +766,7 @@
 
         document.getElementById('adminName').textContent = data.user.firstName || 'Admin';
         loadItems();
+        loadAccounts();
       } catch (error) {
         console.error('Auth error:', error);
         localStorage.removeItem('token');
@@ -788,6 +804,64 @@
       document.getElementById('foundItems').textContent = found;
       document.getElementById('lostItems').textContent = lost;
       document.getElementById('claimedItems').textContent = claimed;
+    }
+
+    // Load all accounts
+    async function loadAccounts() {
+      try {
+        const response = await fetch('/api/auth/users', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load accounts');
+
+        const accounts = await response.json();
+        
+        document.getElementById('totalAccounts').textContent = accounts.length;
+        
+        if (accounts.length === 0) {
+          document.getElementById('accountsTableContainer').innerHTML = 
+            '<div class="no-items">No accounts found</div>';
+          return;
+        }
+
+        const tableHTML = `
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Items Uploaded</th>
+                <th>Registered Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${accounts.map(account => `
+                <tr>
+                  <td><strong>${account.studentId}</strong></td>
+                  <td>${account.firstName} ${account.lastName}</td>
+                  <td>${account.email}</td>
+                  <td>
+                    <span class="status-badge ${account.role === 'admin' ? 'status-claimed' : 'status-active'}">
+                      ${account.role.charAt(0).toUpperCase() + account.role.slice(1)}
+                    </span>
+                  </td>
+                  <td>${account.itemsUploaded || 0}</td>
+                  <td>${new Date(account.createdAt).toLocaleDateString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        document.getElementById('accountsTableContainer').innerHTML = tableHTML;
+      } catch (error) {
+        console.error('Error loading accounts:', error);
+        document.getElementById('accountsTableContainer').innerHTML = 
+          '<div class="no-items">Error loading accounts</div>';
+      }
     }
 
     // Display items in table
@@ -1132,5 +1206,15 @@
     // Initialize
     checkAdminAuth();
   </script>
+
+  <!-- Footer -->
+  <footer style="background: rgba(115, 48, 21, 0.95); color: #f7efda; padding: 20px; text-align: center; margin-top: 40px;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+      <span style="font-size: 0.9rem;">© 2025 FinderAI - Mapúa Malayan Colleges Mindanao</span>
+      <a href="https://www.facebook.com/mapuamcm" target="_blank" style="color: #f7efda; font-size: 24px; transition: transform 0.2s;" title="Visit our Facebook page">
+        <i class="fa-brands fa-facebook"></i>
+      </a>
+    </div>
+  </footer>
 </body>
 </html>

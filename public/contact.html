@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | FinderAI</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Bricolage Grotesque", sans-serif;
+            background: #f7efda;
+            min-height: 100vh;
+            color: #733015;
+        }
+
+        /* Navigation */
+        nav {
+            background: #733015;
+            padding: 20px 50px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            color: #f7efda;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #ffb400;
+        }
+
+        /* Main Container */
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #733015;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #733015;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Contact Cards */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto 60px;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(115, 48, 21, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid #733015;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(115, 48, 21, 0.2);
+        }
+
+        .contact-card i {
+            font-size: 3rem;
+            color: #733015;
+            margin-bottom: 20px;
+        }
+
+        .contact-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #733015;
+        }
+
+        .contact-card p {
+            font-size: 1rem;
+            color: #733015;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .contact-card a {
+            color: #733015;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #733015;
+            padding-bottom: 2px;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        .contact-card a:hover {
+            color: #ffb400;
+            border-color: #ffb400;
+        }
+
+        /* Map Section */
+        .map-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(115, 48, 21, 0.1);
+            border: 2px solid #733015;
+            margin-bottom: 40px;
+        }
+
+        .map-section h2 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #733015;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #733015;
+        }
+
+        /* Footer */
+        footer {
+            background: #733015;
+            color: #f7efda;
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer .socials {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        footer .socials a {
+            color: #f7efda;
+            font-size: 28px;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        footer .socials a:hover {
+            color: #ffb400;
+            transform: scale(1.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+
+            nav {
+                padding: 15px 20px;
+            }
+
+            nav ul {
+                gap: 20px;
+            }
+
+            .map-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">HOME</a></li>
+            <li><a href="about.html">ABOUT</a></li>
+            <li><a href="contact.html">CONTACT US</a></li>
+            <li><a href="help.html">HELP</a></li>
+            <li><a href="login.html">LOGIN</a></li>
+        </ul>
+    </nav>
+
+    <div class="contact-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1><i class="fas fa-envelope"></i> Contact Us</h1>
+            <p>
+                Have questions or need assistance? We're here to help! Reach out to us through any of the channels below.
+            </p>
+        </div>
+
+        <!-- Contact Cards -->
+        <div class="contact-grid">
+            <div class="contact-card">
+                <i class="fas fa-envelope"></i>
+                <h3>Email</h3>
+                <p>Send us an email</p>
+                <a href="mailto:finderai@mcm.edu.ph">finderai@mcm.edu.ph</a>
+            </div>
+            
+            <div class="contact-card">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Visit Us</h3>
+                <p>Lost & Found Desk</p>
+                <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank">Mapúa MCM Campus</a>
+            </div>
+            
+            <div class="contact-card">
+                <i class="fas fa-phone"></i>
+                <h3>Call Us</h3>
+                <p>Mon-Fri 8AM-5PM</p>
+                <a href="tel:+639123456789">+63 912 345 6789</a>
+            </div>
+            
+            <div class="contact-card">
+                <i class="fab fa-facebook"></i>
+                <h3>Facebook</h3>
+                <p>Follow us on social media</p>
+                <a href="https://www.facebook.com/mapuamcm" target="_blank">@mapuamcm</a>
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <div class="map-section">
+            <h2><i class="fas fa-location-dot"></i> Find Us On Campus</h2>
+            <div class="map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3959.8318661234567!2d125.60945!3d7.073611!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32f96d9d8d8d8d8d%3A0x8d8d8d8d8d8d8d8d!2sMap%C3%BAa%20Malayan%20Colleges%20Mindanao!5e0!3m2!1sen!2sph!4v1234567890123!5m2!1sen!2sph" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p style="font-size: 1.1rem; margin-bottom: 10px;">© 2025 FinderAI - Mapúa Malayan Colleges Mindanao</p>
+        <p style="font-size: 0.9rem; opacity: 0.8;">Lost objects, found hope</p>
+        <div class="socials">
+            <a href="mailto:finderai@mcm.edu.ph" title="Email us"><i class="fa-solid fa-envelope"></i></a>
+            <a href="https://www.facebook.com/mapuamcm" target="_blank" title="Visit our Facebook"><i class="fa-brands fa-facebook"></i></a>
+            <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank" title="Find us on Map"><i class="fa-solid fa-location-dot"></i></a>
+            <a href="tel:+639123456789" title="Call us"><i class="fa-solid fa-phone"></i></a>
+        </div>
+    </footer>
+</body>
+</html>

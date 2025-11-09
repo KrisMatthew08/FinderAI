@@ -125,4 +125,44 @@ router.get('/verify', async (req, res) => {
   }
 });
 
+// Get all users (Admin only)
+router.get('/users', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const adminUser = await User.findById(decoded.id);
+    
+    // Check if user is admin
+    if (!adminUser || adminUser.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin only.' });
+    }
+
+    // Get all users with item counts
+    const Item = require('../models/Item');
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    
+    // Add item counts for each user
+    const usersWithCounts = await Promise.all(
+      users.map(async (user) => {
+        const itemCount = await Item.countDocuments({ studentId: user.studentId });
+        return {
+          ...user.toObject(),
+          itemsUploaded: itemCount
+        };
+      })
+    );
+
+    console.log(`✅ Retrieved ${usersWithCounts.length} users for admin`);
+    res.json(usersWithCounts);
+  } catch (err) {
+    console.error('❌ Error fetching users:', err);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
 module.exports = router;
