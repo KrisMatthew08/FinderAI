@@ -257,55 +257,19 @@
                 <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank" title="Find us on Map"><i class="fa-solid fa-location-dot"></i></a>
                 <a href="tel:+639123456789" title="Call us"><i class="fa-solid fa-phone"></i></a>
             </div>
-            <button class="order-btn" onclick="document.getElementById('forms-section').scrollIntoView({behavior: 'smooth'})">FIND NOW</button>
+            <button class="order-btn" onclick="toggleForms()">FIND NOW</button>
         </div>
     </section>
 
     <!-- Forms Section -->
-    <section class="forms-section" id="forms-section">
+    <section class="forms-section" id="forms-section" style="display: none;">
         <div class="tabs">
-            <span class="tab active" id="lostTab">Report Found Item</span>
-            <span class="tab" id="claimTab">Report Lost Item</span>
+            <span class="tab active" id="lostTab">Report Lost Item</span>
+            <span class="tab" id="foundTab">Report Found Item</span>
         </div>
 
-        <!-- Found Item Form (Initially visible) -->
-        <section class="lostfile-section tab-content active" id="foundItemContent">
-            <h2>Report a Found Item</h2>
-            <form id="foundItemForm" enctype="multipart/form-data">
-                <input type="file" accept="image/*" id="foundImageInput" name="image">
-                <label for="foundImageInput">Upload Image of Found Item</label>
-                <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
-                    <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
-                </div>
-
-                <label for="foundCategorySelect">Category:</label>
-                <select id="foundCategorySelect" name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Wallet">Wallet</option>
-                    <option value="Phone">Phone</option>
-                    <option value="Keys">Keys</option>
-                    <option value="Bag">Bag</option>
-                    <option value="ID">ID/Card</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Jewelry">Jewelry</option>
-                    <option value="Other">Other</option>
-                </select>
-
-                <label for="foundLocText">Location Found:</label>
-                <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
-
-                <label for="foundDateInput">Date Found:</label>
-                <input type="date" id="foundDateInput" name="dateFound" required>
-
-                <label for="foundDescText">Description:</label>
-                <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
-
-                <button type="submit" class="submitbtn">Submit Found Item</button>
-            </form>
-        </section>
-
-        <!-- Lost Item Form (Initially hidden) -->
-        <section class="lostfile-section tab-content" id="lostItemContent">
+        <!-- Lost Item Form (Initially visible) -->
+        <section class="lostfile-section tab-content active" id="lostItemContent">
             <h2>Report a Lost Item</h2>
             <form id="lostItemForm" enctype="multipart/form-data">
                 <input type="file" accept="image/*" id="lostImageInput" name="image">
@@ -337,6 +301,42 @@
                 <textarea id="lostDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
 
                 <button type="submit" class="submitbtn">Submit Lost Item</button>
+            </form>
+        </section>
+
+        <!-- Found Item Form (Initially hidden) -->
+        <section class="lostfile-section tab-content" id="foundItemContent">
+            <h2>Report a Found Item</h2>
+            <form id="foundItemForm" enctype="multipart/form-data">
+                <input type="file" accept="image/*" id="foundImageInput" name="image">
+                <label for="foundImageInput">Upload Image of Found Item</label>
+                <div id="foundImagePreview" style="display: none; margin: 15px 0; max-width: 400px;">
+                    <img id="foundPreviewImg" src="" alt="Preview" style="width: 100%; height: auto; border: 2px solid #733015; border-radius: 10px;">
+                </div>
+
+                <label for="foundCategorySelect">Category:</label>
+                <select id="foundCategorySelect" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Wallet">Wallet</option>
+                    <option value="Phone">Phone</option>
+                    <option value="Keys">Keys</option>
+                    <option value="Bag">Bag</option>
+                    <option value="ID">ID/Card</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Jewelry">Jewelry</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <label for="foundLocText">Location Found:</label>
+                <textarea id="foundLocText" name="location" rows="3" placeholder="e.g., Mapua Library, 2nd Floor" required></textarea>
+
+                <label for="foundDateInput">Date Found:</label>
+                <input type="date" id="foundDateInput" name="dateFound" required>
+
+                <label for="foundDescText">Description:</label>
+                <textarea id="foundDescText" name="description" rows="3" placeholder="Describe the item (color, brand, condition, etc.)" required></textarea>
+
+                <button type="submit" class="submitbtn">Submit Found Item</button>
             </form>
         </section>
     </section>
@@ -380,24 +380,42 @@
     </footer>
 
     <script>
+        // Toggle forms visibility
+        function toggleForms() {
+            const formsSection = document.getElementById('forms-section');
+            const isHidden = formsSection.style.display === 'none';
+            
+            if (isHidden) {
+                formsSection.style.display = 'block';
+                // Scroll to forms section smoothly
+                setTimeout(() => {
+                    formsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                formsSection.style.display = 'none';
+                // Scroll back to intro section
+                document.querySelector('.intro-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
         // Tab switching
         const lostTab = document.getElementById('lostTab');
-        const claimTab = document.getElementById('claimTab');
+        const foundTab = document.getElementById('foundTab');
         const foundItemContent = document.getElementById('foundItemContent');
         const lostItemContent = document.getElementById('lostItemContent');
 
         lostTab.addEventListener('click', () => {
             lostTab.classList.add('active');
-            claimTab.classList.remove('active');
-            foundItemContent.classList.add('active');
-            lostItemContent.classList.remove('active');
-        });
-
-        claimTab.addEventListener('click', () => {
-            claimTab.classList.add('active');
-            lostTab.classList.remove('active');
+            foundTab.classList.remove('active');
             lostItemContent.classList.add('active');
             foundItemContent.classList.remove('active');
+        });
+
+        foundTab.addEventListener('click', () => {
+            foundTab.classList.add('active');
+            lostTab.classList.remove('active');
+            foundItemContent.classList.add('active');
+            lostItemContent.classList.remove('active');
         });
 
         // Image previews - Found Item
