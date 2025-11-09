@@ -1241,8 +1241,20 @@
       const confirmMsg = `Are you sure you want to delete ${selectedItems.size} item(s)? This action cannot be undone.`;
       if (!confirm(confirmMsg)) return;
       
+      const itemsToDelete = Array.from(selectedItems);
+      
       try {
-        const deletePromises = Array.from(selectedItems).map(itemId =>
+        // Immediately remove items from UI for instant feedback
+        allItems = allItems.filter(item => !selectedItems.has(item._id));
+        selectedItems.clear();
+        updateStats();
+        applyFiltersAndSearch();
+        
+        // Show loading toast
+        showToast(`Deleting ${itemsToDelete.length} item(s)...`, 'info');
+        
+        // Delete in background
+        const deletePromises = itemsToDelete.map(itemId =>
           fetch(`/api/items/delete/${itemId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
@@ -1259,13 +1271,14 @@
         }
         if (failCount > 0) {
           showToast(`Failed to delete ${failCount} item(s)`, 'error');
+          // Reload to get accurate data if some failed
+          await loadItems();
         }
-        
-        selectedItems.clear();
-        await loadItems();
       } catch (error) {
         console.error('Error deleting items:', error);
         showToast('Error deleting items', 'error');
+        // Reload on error to get accurate data
+        await loadItems();
       }
     }
 
@@ -1324,17 +1337,29 @@
       if (!confirm('Mark this item as claimed?')) return;
 
       try {
+        // Immediately update item in UI for instant feedback
+        const item = allItems.find(i => i._id === itemId);
+        if (item) {
+          item.claimed = true;
+          updateStats();
+          applyFiltersAndSearch();
+        }
+        
+        // Update in background
         const response = await fetch(`/api/items/claim/${itemId}`, {
           method: 'PUT',
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
 
-        if (!response.ok) throw new Error('Claim failed');
+        if (!response.ok) {
+          throw new Error('Claim failed');
+        }
 
         showToast('Item marked as claimed!', 'success');
-        loadItems(); // Auto-refresh without blocking
       } catch (error) {
         showToast('Error claiming item: ' + error.message, 'error');
+        // Reload on error to get accurate data
+        await loadItems();
       }
     }
 
@@ -1343,17 +1368,27 @@
       if (!confirm('Are you sure you want to delete this item? This cannot be undone.')) return;
 
       try {
+        // Immediately remove item from UI for instant feedback
+        allItems = allItems.filter(item => item._id !== itemId);
+        selectedItems.delete(itemId);
+        updateStats();
+        applyFiltersAndSearch();
+        
+        // Delete in background
         const response = await fetch(`/api/items/delete/${itemId}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
 
-        if (!response.ok) throw new Error('Delete failed');
+        if (!response.ok) {
+          throw new Error('Delete failed');
+        }
 
         showToast('Item deleted successfully!', 'success');
-        loadItems(); // Auto-refresh without blocking
       } catch (error) {
         showToast('Error deleting item: ' + error.message, 'error');
+        // Reload on error to get accurate data
+        await loadItems();
       }
     }
 
