@@ -251,7 +251,7 @@
         <div class="intro-content">
             <h1>FINDER AI:<br>Lost objects, found hope</h1>
             <p>Unite owners and their valuables with instant, accurate, and secure matching using the most advanced AI platform</p>
-            <img src="assets/mmcm_logo.png" alt="Mapua Logo" class="center-logo">
+            <img src="assets/finderai_logo.png" alt="FinderAI Logo" class="center-logo">
             <div class="socials">
                 <a href="mailto:finderai@mcm.edu.ph" title="Email us"><i class="fa-solid fa-envelope"></i></a>
                 <a href="https://maps.app.goo.gl/do92xJ4BGgYxSEJw5" target="_blank" title="Find us on Map"><i class="fa-solid fa-location-dot"></i></a>
@@ -382,6 +382,14 @@
     <script>
         // Toggle forms visibility
         function toggleForms() {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Redirect to login page if not logged in
+                window.location.href = 'login.html';
+                return;
+            }
+            
             const formsSection = document.getElementById('forms-section');
             const isHidden = formsSection.style.display === 'none';
             

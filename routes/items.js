@@ -385,11 +385,15 @@ router.get('/my-matches', auth, async (req, res) => {
       // Skip if already claimed
       if (userItem.status === 'claimed') continue;
       
-      // Find items of opposite type (if user has lost, find found items and vice versa)
-      const oppositeType = userItem.type === 'lost' ? 'found' : 'lost';
+      // IMPORTANT: Only show matches to users who reported LOST items
+      // Users who found items don't need to see potential matches
+      if (userItem.type !== 'lost') {
+        continue; // Skip found items
+      }
       
+      // Find FOUND items that might match this LOST item
       const potentialMatches = await Item.find({
-        type: oppositeType,
+        type: 'found',
         studentId: { $ne: studentId }, // Not the same user
         status: { $ne: 'claimed' } // Not already claimed
       });
