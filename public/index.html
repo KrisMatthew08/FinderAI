@@ -609,6 +609,40 @@
                 })
                 .catch(err => console.error('Auth verification failed:', err));
             }
+
+            // Check if coming from dashboard with activeTab set
+            const activeTab = sessionStorage.getItem('activeTab');
+            if (activeTab) {
+                // Clear the sessionStorage
+                sessionStorage.removeItem('activeTab');
+                
+                // Show the forms section
+                const formsSection = document.getElementById('forms-section');
+                formsSection.style.display = 'block';
+                
+                // Switch to the correct tab
+                const lostTab = document.getElementById('lostTab');
+                const foundTab = document.getElementById('foundTab');
+                const foundItemContent = document.getElementById('foundItemContent');
+                const lostItemContent = document.getElementById('lostItemContent');
+                
+                if (activeTab === 'found') {
+                    foundTab.classList.add('active');
+                    lostTab.classList.remove('active');
+                    foundItemContent.classList.add('active');
+                    lostItemContent.classList.remove('active');
+                } else if (activeTab === 'lost') {
+                    lostTab.classList.add('active');
+                    foundTab.classList.remove('active');
+                    lostItemContent.classList.add('active');
+                    foundItemContent.classList.remove('active');
+                }
+                
+                // Scroll to forms section
+                setTimeout(() => {
+                    formsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
         });
     </script>
     
