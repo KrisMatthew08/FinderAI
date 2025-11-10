@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const Item = require('../models/Item');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 const axios = require('axios');
 const sharp = require('sharp');
@@ -139,6 +140,47 @@ router.post('/upload', auth, upload.single('image'), async (req, res) => {
     console.log('   - Student ID:', req.user.studentId);
     console.log('   - Image size:', originalImageBuffer.length, 'bytes');
     console.log('   - Embeddings dimensions:', embeddings.length);
+    
+    // Find potential matches and create notifications
+    try {
+      const oppositeType = type === 'lost' ? 'found' : 'lost';
+      const potentialMatches = await Item.find({
+        type: oppositeType,
+        status: { $ne: 'claimed' }
+      });
+      
+      for (const potentialMatch of potentialMatches) {
+        if (!potentialMatch.embeddings || potentialMatch.embeddings.length === 0) continue;
+        
+        const similarity = cosineSimilarity(embeddings, potentialMatch.embeddings) * 100;
+        
+        // Add category bonus
+        const categoryBonus = item.category === potentialMatch.category ? 15 : 0;
+        const finalSimilarity = similarity + categoryBonus;
+        
+        // Create notification if similarity is high enough
+        if (finalSimilarity >= 50) {
+          // Notify the user who submitted the matching item
+          const matchMessage = type === 'lost' 
+            ? `It's a match! Someone reported a lost ${category} that matches your found item. Check your dashboard to see if it's theirs!`
+            : `It's a match! Someone found a ${category} that matches your lost item. Check your dashboard to see if it's yours!`;
+          
+          await Notification.create({
+            studentId: potentialMatch.studentId,
+            type: 'match',
+            title: `� It's a Match!`,
+            message: matchMessage,
+            itemId: potentialMatch._id,
+            matchId: item._id
+          });
+          
+          console.log(`📬 Created notification for student ${potentialMatch.studentId} about potential match`);
+        }
+      }
+    } catch (notifError) {
+      console.error('⚠️ Error creating notifications:', notifError);
+      // Don't fail the upload if notification creation fails
+    }
     
     // Clean up temporary file
     try {
@@ -556,9 +598,9 @@ router.post('/:id/claim', auth, async (req, res) => {
         await Notification.create({
           userId: matchedItemOwner._id.toString(),
           studentId: matchedItem.studentId,
-          type: 'item_claimed',
-          title: 'Your item has been claimed!',
-          message: `Someone has claimed your ${matchedItem.type} item: ${matchedItem.category}. Please check your dashboard for details.`,
+          type: 'claim',
+          title: '✅ Your Item Was Claimed!',
+          message: `Great news! Someone claimed your ${matchedItem.type} ${matchedItem.category}. They believe it matches their item. Please coordinate with them through the platform.`,
           itemId: matchedItem._id,
           matchedItemId: yourItemId,
           read: false
