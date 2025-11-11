@@ -402,6 +402,63 @@ router.get('/my-items', auth, async (req, res) => {
   }
 });
 
+// Get user's matched items with matched item details
+router.get('/my-matched-items', auth, async (req, res) => {
+  try {
+    console.log('📋 Fetching matched items for student:', req.user.studentId);
+    
+    const items = await Item.find({ 
+      studentId: req.user.studentId,
+      status: 'claimed',
+      matchedWith: { $exists: true, $ne: null }
+    }).sort({ claimedDate: -1 });
+    
+    console.log(`✅ Found ${items.length} matched items`);
+    
+    // Fetch matched item details for each item
+    const itemsWithMatchedDetails = await Promise.all(
+      items.map(async (item) => {
+        const itemObj = item.toObject();
+        
+        // Convert user's item image to base64
+        if (itemObj.image && itemObj.image.buffer) {
+          itemObj.image = itemObj.image.buffer.toString('base64');
+        } else if (itemObj.image) {
+          itemObj.image = Buffer.from(itemObj.image).toString('base64');
+        }
+        
+        // Fetch the matched item
+        if (itemObj.matchedWith) {
+          try {
+            const matchedItem = await Item.findById(itemObj.matchedWith);
+            if (matchedItem) {
+              const matchedObj = matchedItem.toObject();
+              
+              // Convert matched item image to base64
+              if (matchedObj.image && matchedObj.image.buffer) {
+                matchedObj.image = matchedObj.image.buffer.toString('base64');
+              } else if (matchedObj.image) {
+                matchedObj.image = Buffer.from(matchedObj.image).toString('base64');
+              }
+              
+              itemObj.matchedItemDetails = matchedObj;
+            }
+          } catch (err) {
+            console.warn(`⚠️ Could not fetch matched item ${itemObj.matchedWith}:`, err.message);
+          }
+        }
+        
+        return itemObj;
+      })
+    );
+    
+    res.json(itemsWithMatchedDetails);
+  } catch (err) {
+    console.error('❌ Error fetching matched items:', err);
+    res.status(500).json({ message: 'Error fetching matched items: ' + err.message });
+  }
+});
+
 // Get potential matches for user's items
 router.get('/my-matches', auth, async (req, res) => {
   try {
