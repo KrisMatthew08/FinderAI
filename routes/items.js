@@ -3,6 +3,7 @@ const multer = require('multer');
 const Item = require('../models/Item');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const DismissedMatch = require('../models/DismissedMatch');
 const auth = require('../middleware/auth');
 const axios = require('axios');
 const sharp = require('sharp');
@@ -416,7 +417,6 @@ router.get('/my-matches', auth, async (req, res) => {
     }
     
     // Get dismissed matches for this user
-    const DismissedMatch = require('../models/DismissedMatch');
     const dismissedMatches = await DismissedMatch.find({ studentId });
     const dismissedIds = new Set(dismissedMatches.map(dm => dm.dismissedItemId.toString()));
     
@@ -630,8 +630,6 @@ router.post('/matches/:id/dismiss', auth, async (req, res) => {
     const { yourItemId } = req.body;
     const dismissedItemId = req.params.id;
     const studentId = req.user.studentId;
-    
-    const DismissedMatch = require('../models/DismissedMatch');
     
     // Save the dismissed match
     await DismissedMatch.findOneAndUpdate(
