@@ -656,8 +656,8 @@ router.post('/:id/claim', auth, async (req, res) => {
           userId: matchedItemOwner._id.toString(),
           studentId: matchedItem.studentId,
           type: 'claim',
-          title: '✅ Your Item Was Claimed!',
-          message: `Great news! Someone claimed your ${matchedItem.type} ${matchedItem.category}. They believe it matches their item. Please coordinate with them through the platform.`,
+          title: '✅ Your Item Was Matched!',
+          message: `Great news! Someone matched your ${matchedItem.type} ${matchedItem.category}. They believe it matches their item. Please coordinate with them through the platform.`,
           itemId: matchedItem._id,
           matchedItemId: yourItemId,
           read: false
